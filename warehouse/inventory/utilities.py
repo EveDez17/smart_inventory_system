@@ -1,11 +1,9 @@
-# utilities.py
-# This is a simplified example. Actual implementation might vary based on your setup.
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
-from warehouse.inventory.models import FLTTask, OrderPickingTask
+from warehouse.inventory.models import OrderPickingTask
 
-# Assuming you have a function to get orders that need to be fulfilled
+
 def get_orders_to_fulfill():
     # Implement your logic to get orders that need to be fulfilled
     pass

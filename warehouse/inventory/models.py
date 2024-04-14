@@ -1,6 +1,7 @@
 from urllib import request
 from django.db import models
 from django.utils import timezone
+import joblib
 from simple_history.models import HistoricalRecords
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -12,12 +13,20 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 import logging
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import transaction
-from django.db.models import F
 from django.contrib import messages
 from django.db import models
+from django.db.models import Count, Sum, Max, Avg
 
-        
+class HistoricalCategoryModel(models.Model):
+    lft = models.IntegerField(null=True, blank=True)
+    rght = models.IntegerField(null=True, blank=True)
+    tree_id = models.IntegerField(null=True, blank=True)
+    level = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        abstract = True       
 class Category(MPTTModel):
     name = models.CharField(
         max_length=100,
@@ -60,7 +69,7 @@ class Category(MPTTModel):
         verbose_name=_("weight limit"),
         help_text=_("Maximum weight limit for this category in kilograms.")
     )
-    history = HistoricalRecords()
+    history = HistoricalRecords(excluded_fields=['lft', 'rght', 'tree_id', 'level'])
 
     class MPTTMeta:
         order_insertion_by = ["name"]
@@ -733,7 +742,7 @@ class PNDLocation(Location):
     def __str__(self):
         return super().__str__() + " - PND"
     
-class Outbound(PNDLocation):
+class Outbound(Location):  # Assuming 'Location' is the correct base class
     address = models.CharField(max_length=255, null=True)
     floor_number = models.PositiveIntegerField()
     bay_number = models.PositiveIntegerField()
@@ -743,37 +752,41 @@ class Outbound(PNDLocation):
     operational_restrictions = models.CharField(max_length=255)
     special_handling_required = models.BooleanField(default=False)
     history = HistoricalRecords()
+    outbound_code = models.CharField(max_length=50, unique=True, verbose_name=_("Outbound Code"))
+    related_outbounds = models.ManyToManyField('self', symmetrical=False, blank=True, verbose_name=_("Related Outbounds"))
+    managing_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='managed_outbounds', verbose_name=_("Managing User"))
+    utilized_capacity = models.PositiveIntegerField(default=0, verbose_name=_("Utilized Capacity"))
 
     def __str__(self):
-        return f"{super().__str__()} - Floor {self.floor_number} - Bay {self.bay_number}"
+        return f"{self.outbound_code} - Floor {self.floor_number} - Bay {self.bay_number}"
 
     @staticmethod
     def get_default_location():
         unique_criteria = {
-            'name': 'Default Location Name',
-            'code': 'DEFAULT_OUTBOUND'  # Ensuring unique code for default location
+            'outbound_code': 'DEFAULT_OUTBOUND',  # Ensuring unique code for default location
+            'location_identifier': 'DEFAULT_OUTBOUND'  # Assuming 'location_identifier' needs to be unique as well
         }
-        default_location, _ = PNDLocation.objects.get_or_create(
-            defaults=unique_criteria,
-            **unique_criteria
-        )
-
-        default_outbound, _ = Outbound.objects.get_or_create(
+        default_location, _ = Outbound.objects.get_or_create(
             defaults={
-                'description': 'The default location for outbound tasks',
-                # Additional default fields can be set here
+                'address': 'Default Address',
+                'floor_number': 1,
+                'bay_number': 1,
+                'additional_info': 'Default outbound location',
+                'max_capacity': 1000,
+                'operational_restrictions': 'None',
+                'special_handling_required': False,
+                'utilized_capacity': 0
             },
             **unique_criteria
         )
-        return default_outbound
+        return default_location
     
-
 class PickFace(Location):
     pick_face_code = models.CharField(max_length=50, unique=True, verbose_name=_("Pick Face Code"))
-    pick_faces = models.ManyToManyField('self', blank=True)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='pick_faces')
-    product = models.ForeignKey('FoodProduct', on_delete=models.CASCADE, related_name='pick_faces')
-    category = models.ForeignKey('Category', on_delete=models.CASCADE, related_name='pick_faces')
+    pick_faces = models.ManyToManyField('self', symmetrical=False, blank=True, verbose_name=_("Related Pick Faces"))
+    parent_location = models.ForeignKey('self', on_delete=models.CASCADE, related_name='child_pick_faces', null=True, blank=True, verbose_name=_("Parent Location"))
+    product = models.ForeignKey('FoodProduct', on_delete=models.CASCADE, related_name='pick_faces', verbose_name=_("Product"))
+    category = models.ForeignKey('Category', on_delete=models.CASCADE, related_name='pick_faces', verbose_name=_("Category"))
     current_stock = models.PositiveIntegerField(default=0, verbose_name=_("Current Stock"))
     low_stock_threshold = models.PositiveIntegerField(default=10, verbose_name=_("Low Stock Threshold"))
     target_stock_level = models.PositiveIntegerField(default=100, verbose_name=_("Target Stock Level"))
@@ -911,52 +924,51 @@ class VNATask(models.Model):
 logger = logging.getLogger(__name__)
     
 class ReplenishmentTask(models.Model):
-    source_location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='replenishment_sources')
-    destination_location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='replenishment_destinations')
-    product = models.ForeignKey(FoodProduct, on_delete=models.CASCADE, related_name='replenishment_tasks')
+    source_location = models.ForeignKey('Location', on_delete=models.CASCADE, related_name='replenishment_sources')
+    destination_location = models.ForeignKey('Location', on_delete=models.CASCADE, related_name='replenishment_destinations')
+    product = models.ForeignKey('FoodProduct', on_delete=models.CASCADE, related_name='replenishment_tasks')
     quantity = models.PositiveIntegerField(help_text=_("Quantity to be replenished."))
     status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('In Progress', 'In Progress'), ('Completed', 'Completed')], default='Pending')
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='replenishment_tasks')
+    assigned_to = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, related_name='replenishment_tasks')
     priority = models.IntegerField(default=0, help_text=_("Priority of the task, with higher numbers indicating higher priority."))
     history = HistoricalRecords()
 
+    def clean(self):
+        """Perform validations before saving the model."""
+        if not self.product_id:
+            raise ValidationError("Product must be set before saving a ReplenishmentTask.")
+        if self.quantity is None:
+            raise ValidationError("Quantity must be provided for a ReplenishmentTask.")
+
     def save(self, *args, **kwargs):
-        if not self.product_id:  # Check if product is set
-            raise ValueError("Product must be set before saving a ReplenishmentTask")
-        if self.quantity is None:  # Ensure quantity is set
-            raise ValueError("Quantity must be provided for a ReplenishmentTask")
-        self.set_priority()
+        """Custom save method that includes set_priority call."""
+        self.set_priority()  # Adjust priority before saving
+        self.clean()  # Validate before saving to ensure data integrity
         super().save(*args, **kwargs)
 
     def set_priority(self):
+        """Set priority based on quantity and product demand."""
         if self.quantity > 100 or (self.product and self.product.is_high_demand):
             self.priority = 100
         else:
             self.priority = 10
 
-    def create_movement_task(self):
+    def create_movement_task(self, FLTTask, VNATask, logger, request=None):
+        """Create movement task based on the type of source location."""
         try:
-            if self.source_location.type == 'Inbound':
-                FLTTask.objects.create(
-                    replenishment_task=self,
-                    source_location=self.source_location,
-                    destination_location=self.destination_location,
-                    product=self.product,
-                    quantity=self.quantity,
-                )
-            else:
-                VNATask.objects.create(
-                    replenishment_task=self,
-                    source_location=self.source_location,
-                    destination_location=self.destination_location,
-                    product=self.product,
-                    quantity=self.quantity,
-                )
+            task_class = FLTTask if self.source_location.type == 'Inbound' else VNATask
+            task_class.objects.create(
+                replenishment_task=self,
+                source_location=self.source_location,
+                destination_location=self.destination_location,
+                product=self.product,
+                quantity=self.quantity,
+            )
         except Exception as e:
-            error_message = f"Error creating movement task: {e}"
+            error_message = f"Error creating movement task: {str(e)}"
             logger.error(error_message)
-            # Handling the error by sending a message
             if request:
+                from django.contrib import messages
                 messages.error(request, error_message)
             
 # FLT TASKS MODEL
@@ -1053,7 +1065,7 @@ class PickingTaskBase(models.Model):
     status = models.CharField(max_length=20, choices=[('Pending', _('Pending')), ('In Progress', _('In Progress')), ('Completed', _('Completed'))], default='Pending')
     start_time = models.DateTimeField(default=timezone.now)
     completion_time = models.DateTimeField(null=True, blank=True)
-    history = HistoricalRecords()
+    history = HistoricalRecords(inherit=True)
 
     class Meta:
         abstract = True
@@ -1068,7 +1080,7 @@ class ReplenishmentPickingTask(PickingTaskBase):
     Task for replenishing stock from storage to PND locations.
     """
     replenishment_request = models.ForeignKey('ReplenishmentRequest', on_delete=models.CASCADE, related_name='picking_tasks', verbose_name=_("Replenishment Request"))
-    history = HistoricalRecords()
+    
     
     class Meta:
         verbose_name = _("Replenishment Picking Task")
@@ -1308,8 +1320,281 @@ class Shipment(models.Model):
 
     def __str__(self):
         return f"Shipment for Dispatch {self.dispatch.order.id} - Shipped at {self.shipment_time.strftime('%Y-%m-%d %H:%M')}"
-
     
+from django.db import models
+from django.utils import timezone
+from django.db.models import Count, Sum, Avg
+
+class Report(models.Model):
+    REPORT_CHOICES = [
+        ('inventory', 'Inventory Report'),
+        ('order', 'Order Report'),
+        ('supplier', 'Supplier Report'),
+        ('shipment', 'Shipment Report'),
+        ('activity', 'User Activity Report'),
+        ('maximums', 'Max Values Report'),  # New type for maximum values report
+    ]
+
+    name = models.CharField(max_length=255)
+    report_type = models.CharField(max_length=100, choices=REPORT_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def generate_report(self):
+        """ Dispatch to the specific report generator based on the report type. """
+        report_generators = {
+            'inventory': self.inventory_report,
+            'order': self.order_report,
+            'supplier': self.supplier_report,
+            'shipment': self.shipment_report,
+            'activity': self.activity_report,
+            'maximums': self.maximums_report,  # Handle maximums report
+        }
+        report_func = report_generators.get(self.report_type, lambda: "Unsupported report type")
+        return report_func()
+
+    def inventory_report(self):
+        """ Generate a report summarizing inventory levels across products. """
+        data = StockLevel.objects.values('product__name') \
+                .annotate(total_stock=Sum('quantity'), max_stock=Max('quantity'), average_price=Avg('product__unit_price')) \
+                .order_by('-total_stock')
+        return data
+
+    def order_report(self):
+        """ Generate a report on orders, categorized by status and aggregated for the past month. """
+        data = Order.objects.filter(order_date__gte=timezone.now() - timezone.timedelta(days=30)) \
+                .values('status') \
+                .annotate(total_orders=Count('id'), max_order_amount=Max('total_amount'), total_amount=Sum('total_amount')) \
+                .order_by('-total_orders')
+        return data
+
+    def maximums_report(self):
+        """ Generate a report to find the maximum values across various entities. """
+        report_data = {
+            'max_inventory': StockLevel.objects.aggregate(Max('quantity')),
+            'max_order_amount': Order.objects.aggregate(Max('total_amount')),
+            'max_product_price': FoodProduct.objects.aggregate(Max('unit_price')),
+            'max_quantity_received': Receiving.objects.aggregate(Max('quantity')),
+            # You can add more fields as required
+        }
+        return report_data
+
+    def __str__(self):
+        return f"{self.name} - {self.get_report_type_display()} ({self.created_at.strftime('%Y-%m-%d')})"
+
+    class Meta:
+        verbose_name = _("Report")
+        verbose_name_plural = _("Reports")
+        ordering = ['-created_at']
+
+
+class Transaction(models.Model):
+    class TransactionType(models.TextChoices):
+        PAYMENT = 'PAY', _('Payment')
+        REFUND = 'REF', _('Refund')
+        ADJUSTMENT = 'ADJ', _('Adjustment')
+
+    class TransactionStatus(models.TextChoices):
+        PENDING = 'PEN', _('Pending')
+        COMPLETED = 'COM', _('Completed')
+        FAILED = 'FAI', _('Failed')
+
+    # Basic transaction details
+    transaction_type = models.CharField(
+        max_length=3,
+        choices=TransactionType.choices,
+        default=TransactionType.PAYMENT,
+        verbose_name=_("Transaction Type")
+    )
+    status = models.CharField(
+        max_length=3,
+        choices=TransactionStatus.choices,
+        default=TransactionStatus.PENDING,
+        verbose_name=_("Status")
+    )
+    amount = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2,
+        verbose_name=_("Amount")
+    )
+    description = models.TextField(
+        blank=True,
+        verbose_name=_("Description")
+    )
+
+    # References to related entities
+    order = models.ForeignKey(
+        'Order',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='transactions',
+        verbose_name=_("Related Order")
+    )
+    customer = models.ForeignKey(
+        'Customer',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='transactions',
+        verbose_name=_("Related Customer")
+    )
+    supplier = models.ForeignKey(
+        'Supplier',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='transactions',
+        verbose_name=_("Related Supplier")
+    )
+
+    # Timestamps
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Created At")
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Updated At")
+    )
+
+    def __str__(self):
+        return f"{self.get_transaction_type_display()} - ${self.amount} - {self.get_status_display()} on {self.created_at.strftime('%Y-%m-%d')}"
+
+    class Meta:
+        verbose_name = _("Transaction")
+        verbose_name_plural = _("Transactions")
+        ordering = ['-created_at']
+
+# IoT Integretion
+
+class Sensor(models.Model):
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='sensors')
+    sensor_type = models.CharField(max_length=50, verbose_name=_("Sensor Type"))
+    status = models.CharField(max_length=20, choices=[('Active', 'Active'), ('Inactive', 'Inactive')], default='Active')
+    last_checked = models.DateTimeField(auto_now=True, verbose_name=_("Last Checked"))
+
+    def __str__(self):
+        return f"{self.sensor_type} Sensor at {self.location.code} - {self.get_status_display()}"
+
+class SensorData(models.Model):
+    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE, related_name='data')
+    data = models.JSONField(verbose_name=_("Data"))
+    timestamp = models.DateTimeField(auto_now_add=True, verbose_name=_("Timestamp"))
+
+    def __str__(self):
+        return f"Data from {self.sensor} at {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+
+
+# AI Integresion
+
+class PredictionModel(models.Model):
+    name = models.CharField(max_length=255)
+    model_file = models.FileField(upload_to='models/')
+
+    def predict(self, X):
+        # Load the model from the file each time before making a prediction
+        model = joblib.load(self.model_file.path)
+        return model.predict(X)
+
+    def __str__(self):
+        return self.name
+
+
+
+
+
+#USER SETUP TO LOGIN
+
+class UserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError(_('The Email field must be set'))
+        email = self.normalize_email(email).lower()  # Normalize and convert email to lowercase
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError(_('Superuser must have is_staff=True.'))
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError(_('Superuser must have is_superuser=True.'))
+
+        return self.create_user(email, password, **extra_fields)
+    
+
+class User(AbstractUser):
+    email = models.EmailField(_('email address'), unique=True)
+
+    class Role(models.TextChoices):
+        DEFAULT_USER = "DEFAULT_USER", _('Default User')
+        SECURITY = "SECURITY", _('Security')
+        RECEPTIONIST = "RECEPTIONIST", _('Receptionist')
+        WAREHOUSE_OPERATIVE = "WAREHOUSE_OPERATIVE", _('Warehouse Operative')
+        WAREHOUSE_ADMIN = "WAREHOUSE_ADMIN", _('Warehouse Admin')
+        WAREHOUSE_TEAM_LEADER = "WAREHOUSE_TEAM_LEADER", _('Warehouse Team Leader')
+        WAREHOUSE_MANAGER = "WAREHOUSE_MANAGER", _('Warehouse Manager')
+        INVENTORY_ADMIN = "INVENTORY_ADMIN", _('Inventory Admin')
+        INVENTORY_TEAM_LEADER = "INVENTORY_TEAM_LEADER", _('Inventory Team Leader')
+        INVENTORY_MANAGER = "INVENTORY_MANAGER", _('Inventory Manager')
+        OPERATIONAL_MANAGER = "OPERATIONAL_MANAGER", _('Operational Manager')
+
+    role = models.CharField(
+        max_length=50,
+        choices=Role.choices,
+        default=Role.DEFAULT_USER,
+        verbose_name=_('Role')
+    )
+
+    # Overriding groups and user_permissions to fix reverse accessor clashes
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name=_('groups'),
+        blank=True,
+        help_text=_('The groups this user belongs to. A user will get all permissions granted to each of their groups.'),
+        related_name="custom_user_groups",
+        related_query_name="user",
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name=_('user permissions'),
+        blank=True,
+        help_text=_('Specific permissions for this user.'),
+        related_name="custom_user_permissions",
+        related_query_name="user",
+    )
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()
+
+    def has_role(self, role):
+        return self.role == role
+
+class Employee(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    first_name = models.CharField(max_length=255, verbose_name=_('First Name'))
+    last_name = models.CharField(max_length=255, verbose_name=_('Last Name'))
+    dob = models.DateField(verbose_name=_('Date of Birth'))
+    personal_email = models.EmailField(unique=True, verbose_name=_('Personal Email'))
+    contact_number = models.CharField(max_length=20, verbose_name=_('Contact Number'))
+    address = models.ForeignKey(Address, on_delete=models.CASCADE, verbose_name=_('Address'))
+    position = models.CharField(max_length=100, verbose_name=_('Position'))
+    start_date = models.DateField(verbose_name=_('Start Date'))
+
+    class Meta:
+        db_table = 'employee'
+        verbose_name = _('Employee')
+        verbose_name_plural = _('Employees')
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
 
 
 

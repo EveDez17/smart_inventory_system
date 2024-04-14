@@ -8,7 +8,7 @@ from django.utils import timezone
 from factory.django import DjangoModelFactory
 from pytest_factoryboy import register
 from warehouse.inventory import models
-from warehouse.inventory.models import Address, Aisle, AuditLog, Category, Customer, FLTTask, FinalBayAssignment, FoodProduct, GatehouseBooking, LLOPTask, Level, Location, Order, OrderItem, OrderPickingTask, Outbound, PickFace, ProductLocation, ProvisionalBayAssignment, Rack, ReplenishmentRequest, ReplenishmentTask, StockLevel, Supplier,  VNATask, Zone
+from warehouse.inventory.models import Address, Aisle, AuditLog, Category, Customer, FLTTask, FinalBayAssignment, FoodProduct, GatehouseBooking, LLOPTask, Level, Location, Order, OrderItem, OrderPickingTask, Outbound, PickFace, ProductLocation, ProvisionalBayAssignment, Rack, ReplenishmentRequest, ReplenishmentTask, StockLevel,  VNATask, Zone
 
 
 fake = Faker()
@@ -20,11 +20,7 @@ class CategoryFactory(DjangoModelFactory):
         model = Category
 
     name = factory.Sequence(lambda n: f"Category{n}")
-    slug = factory.LazyAttribute(lambda x: f"category-{x.name.lower().replace(' ', '-')}")
-    is_active = factory.Faker('boolean')
-    parent = None  # Optionally set if creating a category tree
-    pnd_location = None  # Should be a PNDLocation if used
-    weight_limit = factory.Maybe(factory.Faker('pydecimal', positive=True, right_digits=2, max_value=100), None, chance_of_none=0.5)
+    slug = factory.LazyAttribute(lambda x: f"category-{random.randint(1000, 9999)}")
 
 register(CategoryFactory)
 
@@ -37,26 +33,21 @@ class AddressFactory(factory.django.DjangoModelFactory):
     city = factory.Faker('city')
     county = factory.Faker('state')
     country = factory.Faker('country')
-    post_code = factory.Sequence(lambda n: f"PostCode{n}")  # Unique post codes
+    post_code = factory.Faker('postcode')
     created_at = factory.LazyFunction(timezone.now)
     updated_at = factory.LazyFunction(timezone.now)
-
-register(AddressFactory)
-
 
 
 
 class SupplierFactory(DjangoModelFactory):
     class Meta:
-        model = Supplier
+        model = models.Supplier
 
     name = factory.Faker('company')
     contact = factory.Faker('name')
     email = factory.Faker('email')
     contact_number = factory.Faker('phone_number')
     address = factory.SubFactory(AddressFactory)
-    created_at = factory.LazyFunction(timezone.now)
-    updated_at = factory.LazyFunction(timezone.now)
 
 register(SupplierFactory)
 
@@ -69,21 +60,21 @@ class FoodProductFactory(DjangoModelFactory):
     sku = factory.Sequence(lambda n: f"SKU{n:05d}")
     name = factory.Faker('name')
     description = factory.Faker('sentence')
-    quantity = factory.Faker('random_int', min=1, max=1000)
+    quantity = factory.Faker('random_int', min=1, max=1000)  # Ensures quantity is always non-negative
     unit_price = factory.Faker('pydecimal', right_digits=2, positive=True, min_value=1, max_value=100)
     category = factory.SubFactory(CategoryFactory)
     suppliers = factory.RelatedFactoryList(
         SupplierFactory,
         factory_related_name='products',
-        size=3
+        size=3  # Assumes each product has 3 suppliers
     )
     is_high_demand = factory.Faker('boolean')
     batch_number = factory.Sequence(lambda n: f"Batch{n:03d}")
     storage_temperature = factory.Iterator(["0°C-4°C", "5°C-10°C", "Ambient"])
     date_received = factory.Faker('date_this_decade')
     expiration_date = factory.LazyAttribute(lambda o: o.date_received + timedelta(days=365))
-    supplier = factory.SubFactory(SupplierFactory)
-    last_updated_by = None # Assuming UserFactory is defined
+    supplier = factory.Faker('company')
+    last_updated_by = None  # No user associated
     updated_at = factory.LazyFunction(timezone.now)
     stock = factory.Faker('random_int', min=0, max=1000)
 
@@ -94,8 +85,6 @@ class FoodProductFactory(DjangoModelFactory):
         if extracted:
             for supplier in extracted:
                 self.suppliers.add(supplier)
-
-register(FoodProductFactory)
 
 
 class ReceivingFactory(DjangoModelFactory):
@@ -295,12 +284,10 @@ class VNATaskFactory(DjangoModelFactory):
     task_type = factory.Iterator(['Putaway', 'Order Picking', 'Replenishment Picking'])
     product = factory.SubFactory(FoodProductFactory)
     quantity = factory.Faker('random_int', min=1, max=100)
-    source_location = factory.SubFactory(LocationFactory)  # Assuming LocationFactory is defined
+    source_location = factory.SubFactory(LocationFactory)
     destination_location = factory.SubFactory(LocationFactory)
     vna_equipment = factory.Faker('word')
     status = factory.Iterator(['Assigned', 'In Progress', 'Completed'])
-    start_time = factory.LazyFunction(timezone.now)
-    completion_time = None  # Set dynamically if needed
 
     # Use LazyAttribute for conditional logic instead of Maybe for clarity and control
     @factory.lazy_attribute
@@ -359,10 +346,13 @@ class ReplenishmentPickingVNATaskFactory(BaseVNATaskFactory):
     
     
     
-class CustomerFactory(DjangoModelFactory):
+class CustomerFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Customer
+        
 
+    # Ensure the 'id' field is generated automatically
+    id = factory.Sequence(lambda n: n)
     name = factory.Faker('name')
     email = factory.Faker('email')
     phone = factory.Faker('phone_number')
@@ -370,11 +360,14 @@ class CustomerFactory(DjangoModelFactory):
     
 
 
-class OrderFactory(DjangoModelFactory):
+class OrderFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Order
 
-    customer = factory.SubFactory(CustomerFactory)
+    # Define attributes for the Order object, including customer_id
+    customer = factory.SubFactory(CustomerFactory)  # Assuming CustomerFactory creates valid customers
+
+    # Other fields of the Order model
     order_date = factory.LazyFunction(timezone.now)
     status = 'Pending'
     total_amount = 0.00
@@ -426,9 +419,7 @@ class FLTTaskFactory(DjangoModelFactory):
     status = factory.Iterator(['Pending', 'In Progress', 'Completed'])
     replenishment_task = factory.SubFactory(VNATaskFactory,  status='Assigned')
     replenishment_task = None
-    assigned_to = None  
-    start_time = factory.LazyFunction(timezone.now)
-    completion_time = None
+    assigned_to = None  # Explicitly set to None, ensures no User assignment initially
 
     @factory.post_generation
     def post_create(self, create, extracted, **kwargs):
@@ -509,12 +500,10 @@ class ReplenishmentRequestFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = ReplenishmentRequest
 
-    product = factory.SubFactory(FoodProductFactory)
+    product = factory.SubFactory(FoodProductFactory)  # Ensure this exists
     required_quantity = factory.Faker('random_int', min=10, max=1000)
-    status = factory.Iterator(['Requested', 'Fulfilling', 'Completed'])
+    status = 'Requested'
     created_at = factory.LazyFunction(timezone.now)
-
-register(ReplenishmentRequestFactory)
 
 
 register(ReplenishmentRequestFactory)

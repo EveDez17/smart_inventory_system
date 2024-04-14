@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Login with QR Code{% endblock title %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-info">
+        <h1>Discover Possibilities</h1>
+        <p>Unleash Your Brilliance</p>
+    </div>
+
+    <div class="login-form">
+        <form action="{% url 'login' %}" method="post">
+            {% csrf_token %}
+            <input type="text" id="username" name="username" placeholder="Username" required>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p>Ready to get started? <a href="{% url 'create_account' %}">Create account</a></p>
+        
+        <div class="qr-login">
+            <p>Use your phone camera to scan this code to log in instantly</p>
+            <img src="{% url 'generate_qr' %}" alt="Login with QR Code">
+        </div>
+    </div>
+</div>
+{% endblock content %}

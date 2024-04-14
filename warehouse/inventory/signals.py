@@ -1,7 +1,6 @@
 from asyncio.log import logger
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from warehouse import inventory
 from warehouse.inventory.models import Inbound, Location, PutawayTask
 from warehouse.inventory.notification_utils import send_urgent_notification, send_verification_required_notification
 from django.db.models.signals import post_migrate

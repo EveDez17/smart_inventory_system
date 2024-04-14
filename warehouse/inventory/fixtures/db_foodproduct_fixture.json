@@ -1,0 +1,39 @@
+[
+    {
+      "model": "inventory.foodproduct",
+      "pk": 1,
+      "fields": {
+        "sku": "SKU00001",
+        "name": "Product One",
+        "description": "Description for product one",
+        "quantity": 100,
+        "unit_price": "9.99",
+        "expiration_date": "2025-04-04",
+        "category": 1,
+        "batch_number": "BATCH001",
+        "storage_temperature": "Room Temperature",
+        "date_received": "2023-01-01",
+        "supplier": "",
+        "last_updated_by": null
+      }
+    },
+    {
+      "model": "inventory.foodproduct",
+      "pk": 2,
+      "fields": {
+        "sku": "SKU00002",
+        "name": "Product Two",
+        "description": "Description for product two",
+        "quantity": 150,
+        "unit_price": "19.99",
+        "expiration_date": "2025-06-04",
+        "category": 2,
+        "batch_number": "BATCH002",
+        "storage_temperature": "Cold",
+        "date_received": "2023-02-01",
+        "supplier": "",
+        "last_updated_by": null
+      }
+    }
+  ]
+  

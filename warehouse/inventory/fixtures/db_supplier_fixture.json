@@ -1,0 +1,113 @@
+[
+    {
+        "model": "inventory.supplier",
+        "pk": 1,
+        "fields": {
+          "name": "Supplier One",
+          "contact": "John Doe",
+          "email": "supplier.one@example.com",
+          "contact_number": "123-456-7890",
+          "address": 1
+        }
+      },
+      {
+        "model": "inventory.supplier",
+        "pk": 2,
+        "fields": {
+          "name": "Supplier Two",
+          "contact": "Jane Doe",
+          "email": "supplier.two@example.com",
+          "contact_number": "234-567-8901",
+          "address": 2
+        }
+      },
+      {
+        "model": "inventory.supplier",
+        "pk": 3,
+        "fields": {
+          "name": "Supplier Three",
+          "contact": "Jim Beam",
+          "email": "supplier.three@example.com",
+          "contact_number": "345-678-9012",
+          "address": 3
+        }
+      },
+      {
+        "model": "inventory.supplier",
+        "pk": 4,
+        "fields": {
+          "name": "Supplier Four",
+          "contact": "Jack Daniels",
+          "email": "supplier.four@example.com",
+          "contact_number": "456-789-0123",
+          "address": 4
+        }
+      },
+    {
+      "model": "inventory.supplier",
+      "pk": 5,
+      "fields": {
+        "name": "Supplier Five",
+        "contact": "Jim Bean",
+        "email": "supplier.five@example.com",
+        "contact_number": "567-890-1234",
+        "address": 5
+      }
+    },
+    {
+      "model": "inventory.supplier",
+      "pk": 6,
+      "fields": {
+        "name": "Supplier Six",
+        "contact": "Jill Valley",
+        "email": "supplier.six@example.com",
+        "contact_number": "678-901-2345",
+        "address": 6
+      }
+    },
+    {
+      "model": "inventory.supplier",
+      "pk": 7,
+      "fields": {
+        "name": "Supplier Seven",
+        "contact": "Bob Stone",
+        "email": "supplier.seven@example.com",
+        "contact_number": "789-012-3456",
+        "address": 7
+      }
+    },
+    {
+      "model": "inventory.supplier",
+      "pk": 8,
+      "fields": {
+        "name": "Supplier Eight",
+        "contact": "Alice Wonderland",
+        "email": "supplier.eight@example.com",
+        "contact_number": "890-123-4567",
+        "address": 8
+      }
+    },
+    {
+      "model": "inventory.supplier",
+      "pk": 9,
+      "fields": {
+        "name": "Supplier Nine",
+        "contact": "Charlie Brown",
+        "email": "supplier.nine@example.com",
+        "contact_number": "901-234-5678",
+        "address": 9
+      }
+    },
+    {
+      "model": "inventory.supplier",
+      "pk": 10,
+      "fields": {
+        "name": "Supplier Ten",
+        "contact": "Dana Scully",
+        "email": "supplier.ten@example.com",
+        "contact_number": "012-345-6789",
+        "address": 10
+      }
+    }
+  ]
+  

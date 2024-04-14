@@ -1,0 +1,143 @@
+[
+    {
+      "model": "inventory.address",
+      "pk": 1,
+      "fields": {
+        "street_number": "100",
+        "street_name": "Oak Street",
+        "city": "Metropolis",
+        "county": "Metro",
+        "country": "USA",
+        "post_code": "10001",
+        "created_at": "2024-04-01T08:00:00Z",
+        "updated_at": "2024-04-01T08:00:00Z"
+      }
+    },
+    {
+      "model": "inventory.address",
+      "pk": 2,
+      "fields": {
+        "street_number": "200",
+        "street_name": "Pine Street",
+        "city": "Gotham",
+        "county": "Gotham",
+        "country": "USA",
+        "post_code": "10002",
+        "created_at": "2024-04-01T09:00:00Z",
+        "updated_at": "2024-04-01T09:00:00Z"
+      }
+    },
+    {
+      "model": "inventory.address",
+      "pk": 3,
+      "fields": {
+        "street_number": "300",
+        "street_name": "Maple Street",
+        "city": "Star City",
+        "county": "Star",
+        "country": "USA",
+        "post_code": "10003",
+        "created_at": "2024-04-01T10:00:00Z",
+        "updated_at": "2024-04-01T10:00:00Z"
+      }
+    },
+    {
+      "model": "inventory.address",
+      "pk": 4,
+      "fields": {
+        "street_number": "400",
+        "street_name": "Cedar Street",
+        "city": "Central City",
+        "county": "Central",
+        "country": "USA",
+        "post_code": "10004",
+        "created_at": "2024-04-02T08:00:00Z",
+        "updated_at": "2024-04-02T08:00:00Z"
+      }
+    },
+    {
+      "model": "inventory.address",
+      "pk": 5,
+      "fields": {
+        "street_number": "500",
+        "street_name": "Elm Street",
+        "city": "Coast City",
+        "county": "Coast",
+        "country": "USA",
+        "post_code": "10005",
+        "created_at": "2024-04-02T09:00:00Z",
+        "updated_at": "2024-04-02T09:00:00Z"
+      }
+    },
+    {
+      "model": "inventory.address",
+      "pk": 6,
+      "fields": {
+        "street_number": "600",
+        "street_name": "Birch Street",
+        "city": "Smallville",
+        "county": "Small",
+        "country": "USA",
+        "post_code": "10006",
+        "created_at": "2024-04-02T10:00:00Z",
+        "updated_at": "2024-04-02T10:00:00Z"
+      }
+    },
+    {
+      "model": "inventory.address",
+      "pk": 7,
+      "fields": {
+        "street_number": "700",
+        "street_name": "Aspen Street",
+        "city": "Keystone City",
+        "county": "Keystone",
+        "country": "USA",
+        "post_code": "10007",
+        "created_at": "2024-04-03T08:00:00Z",
+        "updated_at": "2024-04-03T08:00:00Z"
+      }
+    },
+    {
+      "model": "inventory.address",
+      "pk": 8,
+      "fields": {
+        "street_number": "800",
+        "street_name": "Willow Street",
+        "city": "Fawcett City",
+        "county": "Fawcett",
+        "country": "USA",
+        "post_code": "10008",
+        "created_at": "2024-04-03T09:00:00Z",
+        "updated_at": "2024-04-03T09:00:00Z"
+      }
+    },
+    {
+      "model": "inventory.address",
+      "pk": 9,
+      "fields": {
+        "street_number": "900",
+        "street_name": "Palm Street",
+        "city": "Blüdhaven",
+        "county": "Blud",
+        "country": "USA",
+        "post_code": "10009",
+        "created_at": "2024-04-03T10:00:00Z",
+        "updated_at": "2024-04-03T10:00:00Z"
+      }
+    },
+    {
+      "model": "inventory.address",
+      "pk": 10,
+      "fields": {
+        "street_number": "1000",
+        "street_name": "Peachtree Street",
+        "city": "Opal City",
+        "county": "Opal",
+        "country": "USA",
+        "post_code": "10010",
+        "created_at": "2024-04-04T08:00:00Z",
+        "updated_at": "2024-04-04T08:00:00Z"
+      }
+    }
+  ]
+  

@@ -1,0 +1,55 @@
+Metadata-Version: 2.1
+Name: back
+Version: 0.1.4
+Summary: Backbone for PyTorch training loop
+Home-page: https://github.com/EvgenyKashin/backbone
+Author: Evgeny Kashin
+Author-email: kashinevge@gmail.com
+License: MIT
+Keywords: pytorch,deep-learning,training-loop,backbone
+Platform: UNKNOWN
+Requires-Python: >=3.7.0
+Description-Content-Type: text/markdown
+Requires-Dist: torch
+Requires-Dist: torchvision
+Requires-Dist: tensorboard
+Requires-Dist: pandas
+Requires-Dist: pillow
+Requires-Dist: tqdm
+Requires-Dist: jpeg4py
+Requires-Dist: scikit-learn (==0.21.1)
+Requires-Dist: albumentations
+Requires-Dist: future (==0.17.1)
+
+# Backbone for PyTorch training loop
+Will try to keep it minimalistic.
+
+`pip install back`
+```python
+from back import Bone
+```
+
+## Features
+- Progress bar
+- Checkpoints saving/loading
+- Schedulers
+- Tensorboard logging
+- Early stopping
+- Multiple GPUs
+
+## TODO
+- [ ] Learning Rate Finder
+- [ ] Notebook example
+- [ ] Docs/tests
+
+## Docker
+`docker build -t backbone_pytorch .`
+
+or
+
+`sudo docker pull digitman/backbone_pytorch:latest`
+
+## Examples
+### SRM 
+https://github.com/EvgenyKashin/SRMnet
+

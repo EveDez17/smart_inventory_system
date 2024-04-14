@@ -1,0 +1,62 @@
+[
+    {
+        "model": "inventory.category",
+        "pk": 1,
+        "fields": {
+            "name": "Fresh Food",
+            "slug": "Fresh",
+            "is_active": true,
+            "parent": null,
+            "lft": 1,
+            "rght": 2,
+            "tree_id": 3,
+            "level": 0,
+            "weight_limit": 15.00
+        }
+    },
+    {
+        "model": "inventory.category",
+        "pk": 2,
+        "fields": {
+            "name": "Ambient Food",
+            "slug": "Ambient",
+            "is_active": true,
+            "parent": null,
+            "lft": 1,
+            "rght": 2,
+            "tree_id": 1,
+            "level": 0,
+            "weight_limit": 28.00
+        }
+    },
+    {
+        "model": "inventory.category",
+        "pk": 3,
+        "fields": {
+            "name": "Chilled Food",
+            "slug": "Chilled",
+            "is_active": true,
+            "parent": null,
+            "lft": 1,
+            "rght": 2,
+            "tree_id": 2,
+            "level": 0,
+            "weight_limit": 35.00
+        }
+    },
+    {
+        "model": "inventory.category",
+        "pk": 4,
+        "fields": {
+            "name": "Frozen Food",
+            "slug": "Frozen",
+            "is_active": true,
+            "parent": null,
+            "lft": 1,
+            "rght": 2,
+            "tree_id": 4,
+            "level": 0,
+            "weight_limit": 40.00
+        }
+    }
+]

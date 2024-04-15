@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login
 from warehouse.inventory.models import User
 import qrcode
 from io import BytesIO
+from django.contrib.auth.decorators import login_required
 
 def home(request):
     return render(request, "base.html")
@@ -17,7 +18,7 @@ def login_view(request):
         if user is not None:
             login(request, user)
             # Redirect to a success page.
-            return redirect('home')  # Replace 'home' with the name of the route you want to redirect to
+            return redirect('dashboard.html')  # Replace 'home' with the name of the route you want to redirect to
         else:
             # Return an 'invalid login' error message.
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
@@ -69,3 +70,8 @@ def generate_qr(request):
     buffer.seek(0)
 
     return HttpResponse(buffer, content_type='image/png')
+
+@login_required
+def dashboard(request):
+    # You can fetch data or perform any other logic here before rendering the template
+    return render(request, 'dashboard.html')

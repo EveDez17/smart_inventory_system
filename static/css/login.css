@@ -52,23 +52,26 @@ a {
 
 /* Button styling */
 button {
+    display: block; /* Make button a block element */
     background-color: var(--button-color);
     color: white;
-    padding: 10px;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+    line-height: 20px; /* Adjust line-height as needed */
+    margin: 10px auto 20px; /* Center the button with auto margin and add space below */
 }
 
+/* Button hover effect */
 button:hover {
     background-color: var(--button-hover-color);
 }
 
 /* Form inputs styling */
 input[type="text"],
-input[type="password"] {
-    width: 100%;
+input[type="password"],
+button { /* Add button selector here to apply the same width and padding */
+    width: calc(100% - 20px); /* Adjust width to account for padding */
     padding: 10px;
     margin: 10px 0;
     border: 1px solid #ccc;
@@ -161,6 +164,11 @@ input[type="password"] {
     }
     .right-pane {
         padding: 20px;
+    }
+    input[type="text"],
+    input[type="password"],
+    button { /* Update selectors here as well for responsive styles */
+        width: calc(100% - 40px); /* Adjust width to match the responsive padding */
     }
 }
 

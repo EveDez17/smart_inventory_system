@@ -1,0 +1,89 @@
+:root {
+    --primary-color: #005288; /* Dark blue background */
+    --secondary-color: #00A3FF; /* Light blue accent */
+    --text-color: #E1E9F0; /* Light text color */
+    --button-color: #5cb85c; /* Button color */
+    --button-hover-color: #4cae4c; /* Button hover color */
+}
+
+.register-page {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.register-container {
+    background: #FFFFFF;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.register-form {
+    display: grid;
+    grid-gap: 1rem;
+}
+
+.form-control {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    height: 40px;
+}
+
+.btn-primary {
+    background-color: var(--button-color);
+    border-color: var(--button-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: var(--button-hover-color);
+    border-color: var(--button-hover-color);
+}
+
+.form-check-input {
+    margin-right: .5rem;
+}
+
+.form-check-label {
+    display: block;
+    text-align: left;
+    margin-bottom: .5rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.my-4 {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.mb-3 {
+    margin-bottom: 1rem;
+}
+
+/* Add responsive behavior as needed */
+@media (min-width: 768px) {
+    .form-row {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .form-group {
+        flex-basis: calc(50% - 1rem);
+    }
+}
+

@@ -1,4 +1,5 @@
 from django import forms
+from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import gettext_lazy as _
 from warehouse.inventory.models import User, Employee, Address
@@ -13,6 +14,12 @@ class EmployeeRegistrationForm(UserCreationForm):
     start_date = forms.DateField(help_text=_('Enter start date'))
     address = forms.ModelChoiceField(queryset=Address.objects.all(), help_text=_('Select your address'))
     position = forms.CharField(max_length=100, help_text=_('Enter your position'))
+    
+    contact_number = forms.CharField(
+        max_length=20,
+        validators=[RegexValidator(r'^\+?1?\d{9,15}$')],
+        help_text=_('Enter a valid phone number, with country code if applicable.')
+    )
 
     class Meta(UserCreationForm.Meta):
         model = User

@@ -1,11 +1,10 @@
-from urllib import request
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 import joblib
 from simple_history.models import HistoricalRecords
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
 from django.core.validators import RegexValidator, MinValueValidator
@@ -15,7 +14,6 @@ from django.core.exceptions import ValidationError
 import logging
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import transaction
-from django.contrib import messages
 from django.db import models
 from django.db.models import Count, Sum, Max, Avg
 
@@ -134,7 +132,7 @@ class FoodProduct(models.Model):
     date_received = models.DateField()
     expiration_date = models.DateField()
     supplier = models.CharField(max_length=255)
-    last_updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='product_updates')
+    last_updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='product_updates')
     updated_at = models.DateTimeField(auto_now=True, null=True)
     stock = models.IntegerField(default=0)
     history = HistoricalRecords()
@@ -182,7 +180,7 @@ class AuditLog(models.Model):
         verbose_name=_("Action")
     )
     user = models.ForeignKey(
-        User, 
+        settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
         null=True, 
         verbose_name=_("User")
@@ -329,7 +327,7 @@ class Receiving(models.Model):
         help_text=_("Select supplier of the received product")
     )
     received_by = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         related_name='received_by',  # Similar to 'product', establishes a one-to-many relationship: one user can receive many products
@@ -367,7 +365,7 @@ class GatehouseBooking(models.Model):
 class ProvisionalBayAssignment(models.Model):
     gatehouse_booking = models.OneToOneField(GatehouseBooking, on_delete=models.CASCADE)
     provisional_bay = models.CharField(max_length=50)
-    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    assigned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     assigned_at = models.DateTimeField(default=timezone.now)
     history = HistoricalRecords()
 
@@ -377,11 +375,11 @@ class ProvisionalBayAssignment(models.Model):
 class FinalBayAssignment(models.Model):
     provisional_bay_assignment = models.OneToOneField(ProvisionalBayAssignment, on_delete=models.CASCADE)
     final_bay = models.CharField(max_length=50)
-    confirmed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    confirmed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     confirmed_at = models.DateTimeField(default=timezone.now)
     is_loaded = models.BooleanField(default=False, verbose_name=_("Loading Confirmed"))
     loaded_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Loaded At"))
-    loader = models.ForeignKey(User, related_name='loaded_bays', on_delete=models.SET_NULL, null=True, verbose_name=_("Loader"))
+    loader = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='loaded_bays', on_delete=models.SET_NULL, null=True, verbose_name=_("Loader"))
     history = HistoricalRecords()
 
     def confirm_loading(self, loader_user):
@@ -403,7 +401,7 @@ class Inbound(models.Model):
     product = models.ForeignKey(FoodProduct, on_delete=models.CASCADE, related_name='inbounds')
     quantity = models.PositiveIntegerField(verbose_name=_("quantity received"))
     receiving_date = models.DateTimeField(default=timezone.now, verbose_name=_("receiving date"))
-    received_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name=_("received by"), related_name='inbound_receivings')
+    received_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, verbose_name=_("received by"), related_name='inbound_receivings')
     notes = models.TextField(blank=True, null=True, verbose_name=_("additional notes"))
     STATUS_CHOICES = [
         ('Pending', _('Pending Release')),  # Load is awaiting admin release
@@ -478,7 +476,7 @@ class LLOPTask(models.Model):
         help_text=_("Unit price at the time of task creation")
     )
     assigned_to = models.ForeignKey(
-        'auth.User', 
+        settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True, 
@@ -754,7 +752,7 @@ class Outbound(Location):  # Assuming 'Location' is the correct base class
     history = HistoricalRecords()
     outbound_code = models.CharField(max_length=50, unique=True, verbose_name=_("Outbound Code"))
     related_outbounds = models.ManyToManyField('self', symmetrical=False, blank=True, verbose_name=_("Related Outbounds"))
-    managing_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='managed_outbounds', verbose_name=_("Managing User"))
+    managing_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='managed_outbounds', verbose_name=_("Managing User"))
     utilized_capacity = models.PositiveIntegerField(default=0, verbose_name=_("Utilized Capacity"))
 
     def __str__(self):
@@ -847,7 +845,7 @@ def handle_low_stock_pick_face(sender, instance, **kwargs):
 
 class PutawayTask(models.Model):
     inbound = models.ForeignKey(Inbound, on_delete=models.CASCADE, related_name='putaway_tasks')
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='putaway_tasks', verbose_name=_("Assigned FLT Driver"))
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='putaway_tasks', verbose_name=_("Assigned FLT Driver"))
     pnd_location = models.ForeignKey(PNDLocation, on_delete=models.SET_NULL, null=True, verbose_name=_("PND Location"), help_text=_("Final destination in the PND location"))
     pick_face = models.ForeignKey(PickFace, on_delete=models.SET_NULL, null=True, verbose_name=_("Pick Face"), help_text=_("Designated pick face for replenishment"))
     status = models.CharField(max_length=20, choices=[('Assigned', _('Assigned')), ('In Progress', _('In Progress')), ('Completed', _('Completed'))], default='Assigned', verbose_name=_("Status"))
@@ -925,11 +923,11 @@ logger = logging.getLogger(__name__)
     
 class ReplenishmentTask(models.Model):
     source_location = models.ForeignKey('Location', on_delete=models.CASCADE, related_name='replenishment_sources')
-    destination_location = models.ForeignKey('Location', on_delete=models.CASCADE, related_name='replenishment_destinations')
+    destination_location = models.ForeignKey(Location, null=True, on_delete=models.CASCADE, related_name='replenishment_destinations')
     product = models.ForeignKey('FoodProduct', on_delete=models.CASCADE, related_name='replenishment_tasks')
     quantity = models.PositiveIntegerField(help_text=_("Quantity to be replenished."))
     status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('In Progress', 'In Progress'), ('Completed', 'Completed')], default='Pending')
-    assigned_to = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, related_name='replenishment_tasks')
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='replenishment_tasks')
     priority = models.IntegerField(default=0, help_text=_("Priority of the task, with higher numbers indicating higher priority."))
     history = HistoricalRecords()
 
@@ -984,7 +982,7 @@ class FLTTask(models.Model):
     destination_location = models.ForeignKey('Location', on_delete=models.CASCADE, related_name='flt_destination_tasks')
     product = models.ForeignKey('FoodProduct', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='flt_tasks', verbose_name=_("Assigned FLT Driver"))
+    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='flt_tasks', verbose_name=_("Assigned FLT Driver"))
     status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('In Progress', 'In Progress'), ('Completed', 'Completed')], default='Pending')
     start_time = models.DateTimeField(default=timezone.now)
     completion_time = models.DateTimeField(null=True, blank=True)
@@ -1266,7 +1264,7 @@ class OrderPickingTask(models.Model):
 class Dispatch(models.Model):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='dispatch')
     dispatch_time = models.DateTimeField(default=timezone.now, verbose_name=_("Dispatch Time"))
-    dispatched_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name=_("Dispatched By"))
+    dispatched_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, verbose_name=_("Dispatched By"))
     driver_name = models.CharField(max_length=255, verbose_name=_("Driver Name"))
     vehicle_registration = models.CharField(max_length=255, verbose_name=_("Vehicle Registration"))
     trailer_number = models.CharField(max_length=255, verbose_name=_("Trailer Number"))
@@ -1295,7 +1293,7 @@ class LoaderTask(models.Model):
         verbose_name=_("Status")
     )
     completion_time = models.DateTimeField(null=True, blank=True, verbose_name=_("Completion Time"))
-    confirmed_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, verbose_name=_("Confirmed By"))
+    confirmed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, verbose_name=_("Confirmed By"))
     history = HistoricalRecords()
 
     def __str__(self):
@@ -1304,7 +1302,7 @@ class LoaderTask(models.Model):
 class CMR(models.Model):
     dispatch = models.OneToOneField('Dispatch', on_delete=models.CASCADE, related_name='cmr')
     created_at = models.DateTimeField(auto_now_add=True)
-    confirmed_by = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, verbose_name=_("Confirmed By"))
+    confirmed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, verbose_name=_("Confirmed By"))
     document = models.FileField(upload_to='cmr_documents/', verbose_name=_("CMR Document"))
     history = HistoricalRecords()
 
@@ -1314,7 +1312,7 @@ class CMR(models.Model):
 class Shipment(models.Model):
     dispatch = models.OneToOneField(Dispatch, on_delete=models.CASCADE, related_name='shipment')
     shipment_time = models.DateTimeField(default=timezone.now, verbose_name=_("Shipment Time"))
-    shipped_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name=_("Shipped By"))
+    shipped_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, verbose_name=_("Shipped By"))
     tracking_number = models.CharField(max_length=255, verbose_name=_("Tracking Number"), null=True, blank=True)
     history = HistoricalRecords()
 
@@ -1553,7 +1551,7 @@ class User(AbstractUser):
 
     # Overriding groups and user_permissions to fix reverse accessor clashes
     groups = models.ManyToManyField(
-        'auth.Group',
+        settings.AUTH_USER_MODEL,
         verbose_name=_('groups'),
         blank=True,
         help_text=_('The groups this user belongs to. A user will get all permissions granted to each of their groups.'),
@@ -1561,7 +1559,7 @@ class User(AbstractUser):
         related_query_name="user",
     )
     user_permissions = models.ManyToManyField(
-        'auth.Permission',
+        settings.AUTH_USER_MODEL,
         verbose_name=_('user permissions'),
         blank=True,
         help_text=_('Specific permissions for this user.'),

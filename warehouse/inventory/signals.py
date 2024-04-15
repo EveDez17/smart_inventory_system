@@ -35,13 +35,13 @@ def location_update_handler(sender, instance, created, **kwargs):
         elif instance.status == 'vor':
             send_verification_required_notification(instance)
 
-@receiver(post_migrate)
-def create_initial_replenishment_task(sender, **kwargs):
-    product = FoodProduct.objects.first()
-    if product:
-        ReplenishmentTask.objects.create(product=product, quantity=100)
-    else:
-        print("No products available to create an initial replenishment task.")
+#@receiver(post_migrate)
+#def create_initial_replenishment_task(sender, **kwargs):
+#    product = FoodProduct.objects.first()
+#    if product:
+#        ReplenishmentTask.objects.create(product=product, quantity=100)
+#    else:
+ #       print("No products available to create an initial replenishment task.")
 
     
 @receiver(post_save, sender=VNATask)

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/register_styles.css' %}">
+{% block content %}
+  <div class="container">
+    <h2 class="text">Register</h2>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group textbox">
+        {{ form.first_name|as_crispy_field }}
+      </div>
+      <div class="form-group textbox">
+        {{ form.last_name|as_crispy_field }}
+      </div>
+      <div class="form-group textbox">
+        {{ form.email|as_crispy_field }}
+      </div>
+      <div class="form-group textbox">
+        {{ form.password1|as_crispy_field }}
+      </div>
+      <div class="form-group textbox">
+        {{ form.password2|as_crispy_field }}
+      </div>
+      <div class="form-group textbox">
+        {{ form.personal_email|as_crispy_field }}
+      </div>
+      <div class="form-group textbox">
+        {{ form.contact_number|as_crispy_field }}
+      </div>
+      <div class="form-group textbox">
+        {{ form.position|as_crispy_field }}
+      </div>
+      <button type="submit" class="button btn btn-primary">Register</button>
+    </form>
+    <p class="agreement">By register, I agree with the Terms of Use & Privacy Policy</p>
+    <a href="{% url 'demo:login' %}" class="btn btn-link">Already have an account? Log in</a>
+  </div>
+{% endblock %}

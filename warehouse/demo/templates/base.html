@@ -1,31 +1,31 @@
+<!-- base.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Your Site Name{% endblock title %}</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <!-- Additional head content can be added by child templates -->
-    {% block head %}{% endblock head %}
+    <title>{% block title %}Route69 | Smart Routes, Bright Future{% endblock title %}</title>
+    <link rel="stylesheet" href="{% static 'css/base_styles.css' %}">
+    {% block extra_styles %}{% endblock extra_styles %}
 </head>
 <body>
-
     <header>
-        <!-- Common header content can go here -->
+        <!-- Header content can go here -->
     </header>
-
+    
     <main>
         {% block content %}
         <!-- The main content will be overridden by child templates -->
         {% endblock content %}
     </main>
-
+    
     <footer>
         <!-- Common footer content can go here -->
     </footer>
-
-    <!-- Additional scripts can be added by child templates -->
+    
     {% block scripts %}{% endblock scripts %}
 </body>
 </html>
+
+

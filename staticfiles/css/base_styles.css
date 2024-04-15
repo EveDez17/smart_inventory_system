@@ -1,0 +1,167 @@
+/* Inside login.css */
+:root {
+    --primary-color: #005288; /* Dark blue background */
+    --secondary-color: #00A3FF; /* Light blue accent */
+    --text-color: #E1E9F0; /* Text color */
+    --button-color: #5cb85c; /* Button color */
+    --button-hover-color: #4cae4c; /* Button hover color */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    height: 100vh; /* Full height of the viewport */
+}
+
+.left-pane {
+    width: 50%; /* Half the width of the viewport */
+    padding-left: 5%; /* Add padding for spacing */
+    background-color: #f4f4f4; /* Light grey background */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.right-pane {
+    width: 50%; /* Half the width of the viewport */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; /* Center align for the right pane */
+    background-color: var(--primary-color); /* Dark blue background */
+}
+
+/* Text styling */
+.login-info h1,
+.login-info p,
+a {
+    color: var(--text-color);
+}
+
+/* Button styling */
+button {
+    background-color: var(--button-color);
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: var(--button-hover-color);
+}
+
+/* Form inputs styling */
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.qr-login {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.qr-login img {
+    max-width: 100%;
+    width: 200px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.qr-login p {
+    color: var(--text-color);
+    font-size: 16px;
+    margin: 0 auto;
+    width: 80%;
+    line-height: 1.4;
+}
+
+/* Avatar styles */
+.avatar {
+    background: var(--secondary-color);
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+    /* Additional avatar styles */
+}
+
+/* State specific styles */
+.avatar.active .badge,
+.avatar.inactive .badge,
+.avatar.idle .badge,
+.avatar.do_not_disturb .badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 38px;
+    height: 38px;
+    background: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFF;
+    font-size: 12px;
+    line-height: 38px;
+    border: 1.5px solid #FFF;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.avatar.active .badge {
+    background-color: green;
+    transform: scale(1);
+}
+
+.avatar.inactive .badge {
+    background-color: red;
+    transform: scale(0.8);
+}
+
+.avatar.idle .badge {
+    background-color: yellow;
+    transform: scale(0.8);
+}
+
+.avatar.do_not_disturb .badge {
+    background-color: darkred;
+    transform: scale(0.8);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    .left-pane, .right-pane {
+        width: 100%;
+    }
+    .left-pane {
+        padding: 20px;
+    }
+    .right-pane {
+        padding: 20px;
+    }
+}
+

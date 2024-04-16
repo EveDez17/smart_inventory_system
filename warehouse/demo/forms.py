@@ -1,63 +1,41 @@
 from django import forms
-from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import gettext_lazy as _
-from warehouse.inventory.models import User, Employee, Address
-import random
-import string
+from warehouse.inventory.models import User, Employee
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from warehouse.inventory.models import User, Employee
 
-class EmployeeRegistrationForm(UserCreationForm):
-    first_name = forms.CharField(max_length=255, required=True, help_text=_('Input first name'))
-    last_name = forms.CharField(max_length=255, required=True, help_text=_('Input last name'))
-    email = forms.EmailField(max_length=75, help_text=_('Enter a valid email address'))
-    personal_email = forms.EmailField(max_length=75, help_text=_('Enter a valid personal email address'))
-    dob = forms.DateField(help_text=_('Enter date of birth'))
-    contact_number = forms.CharField(max_length=20, help_text=_('Enter at least 11+ numbers'))
-    start_date = forms.DateField(help_text=_('Enter start date'))
-    address = forms.ModelChoiceField(queryset=Address.objects.all(), help_text=_('Select your address'))
-    position = forms.CharField(max_length=100, help_text=_('Enter your position'))
-    
-    contact_number = forms.CharField(
-        max_length=20,
-        validators=[RegexValidator(r'^\+?1?\d{9,15}$')],
-        help_text=_('Enter a valid phone number, with country code if applicable.')
-    )
+class UserRegistrationForm(UserCreationForm):
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = (
-            'first_name', 'last_name', 'email', 'personal_email', 'password1', 'password2', 'contact_number', 'position'
-        )
-
-    def generate_unique_employee_number(self):
-        while True:
-            letters = ''.join(random.choices(string.ascii_uppercase, k=3))
-            numbers = ''.join(random.choices(string.digits, k=4))
-            employee_number = f"{letters}{numbers}"
-            if not Employee.objects.filter(employee_number=employee_number).exists():
-                break
-        return employee_number
-
+        fields = ('email', 'role', 'password1', 'password2')
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+            'role': forms.Select(attrs={'class': 'form-control'}),
+            'password1': forms.PasswordInput(attrs={'class': 'form-control'}),
+            'password2': forms.PasswordInput(attrs={'class': 'form-control'}),
+        }
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.username = self.cleaned_data['email']
+        user.email = self.cleaned_data['email']
         if commit:
             user.save()
-
-            # Ensure the employee_number field exists on the Employee model
-            employee_number = self.generate_unique_employee_number()
-
-            employee = Employee(
-                user=user,
-                first_name=self.cleaned_data['first_name'],
-                last_name=self.cleaned_data['last_name'],
-                dob=self.cleaned_data['dob'],
-                personal_email=self.cleaned_data['personal_email'],
-                contact_number=self.cleaned_data['contact_number'],
-                address=self.cleaned_data['address'],
-                position=self.cleaned_data['position'],
-                start_date=self.cleaned_data['start_date'],
-                employee_number=employee_number,  # This line sets the unique employee number
-            )
-            employee.save()
         return user
+
+class EmployeeRegistrationForm(forms.ModelForm):
+    class Meta:
+        model = Employee
+        fields = ('first_name', 'last_name', 'dob', 'personal_email', 'contact_number', 'address', 'position', 'start_date')
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
+            'dob': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'Date of Birth'}),
+            'personal_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Personal Email'}),
+            'contact_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contact Number'}),
+            'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address'}),
+            'position': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Position'}),
+            'start_date': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'Start Date'}),
+        }

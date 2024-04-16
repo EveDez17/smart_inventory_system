@@ -1,6 +1,7 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
-from warehouse.demo.forms import EmployeeRegistrationForm
+from warehouse.demo.admin import CustomUserCreationForm
+from warehouse.demo.forms import EmployeeRegistrationForm, UserRegistrationForm
 from django.contrib.auth import authenticate, login
 import qrcode
 from django.http import JsonResponse
@@ -69,17 +70,44 @@ def login_with_qr(request, login_token):
     else:
         # Handle invalid login token (e.g., show an error page)
         return redirect('invalid_login')  
+    
 #Register Page
 def register(request):
     if request.method == 'POST':
-        form = EmployeeRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()  # 'form.save()' already saves the User object with the role
-            # You might need to handle the Employee creation here if necessary
-            return redirect('demo:login')  # Redirect to the login page after successful registration
+        user_form = CustomUserCreationForm(request.POST)
+        employee_form = EmployeeRegistrationForm(request.POST)
+        
+        if user_form.is_valid() and employee_form.is_valid():
+            user = user_form.save()
+            # If you want the user to verify their email or be approved by an admin, do not log them in immediately
+            # login(request, user)  # Log the user in
+
+            # Link the employee profile to the newly created user
+            employee = employee_form.save(commit=False)
+            employee.user = user
+            employee.save()
+            
+            # Redirect to a page where you inform the user that their account is pending approval
+            return redirect('account_pending_approval')
+        else:
+            # If there are form errors, add them to the context
+            context = {
+                'user_form': user_form,
+                'employee_form': employee_form
+            }
+            if not user_form.is_valid():
+                context['user_errors'] = user_form.errors
+            if not employee_form.is_valid():
+                context['employee_errors'] = employee_form.errors
+            return render(request, 'registration/register.html', context)
     else:
-        form = EmployeeRegistrationForm()
-    return render(request, 'register.html', {'form': form})
+        user_form = CustomUserCreationForm()
+        employee_form = EmployeeRegistrationForm()
+
+    return render(request, 'registration/register.html', {
+        'user_form': user_form,
+        'employee_form': employee_form
+    })
 
 #QRcode Function
 def generate_qr(request):

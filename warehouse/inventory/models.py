@@ -17,6 +17,8 @@ from django.db import transaction
 from django.db import models
 from django.db.models import Count, Sum, Max, Avg
 
+from warehouse.inventory.utils import send_admin_approval_request
+
 class HistoricalCategoryModel(models.Model):
     lft = models.IntegerField(null=True, blank=True)
     rght = models.IntegerField(null=True, blank=True)
@@ -1511,9 +1513,10 @@ from django.conf import settings
 from warehouse.inventory.managers import UserManager
 
 class User(AbstractUser):
-    username = None  # Remove username, use email for login
+    username = None  # We're using email instead of username
     email = models.EmailField(_('email address'), unique=True)
-
+    is_approved = models.BooleanField(default=False, verbose_name=_('Is Approved'))  # Field to track approval status
+    
     class Role(models.TextChoices):
         DEFAULT_USER = "DEFAULT_USER", _('Default User')
         SECURITY = "SECURITY", _('Security')
@@ -1527,12 +1530,7 @@ class User(AbstractUser):
         INVENTORY_MANAGER = "INVENTORY_MANAGER", _('Inventory Manager')
         OPERATIONAL_MANAGER = "OPERATIONAL_MANAGER", _('Operational Manager')
 
-    role = models.CharField(
-        max_length=50,
-        choices=Role.choices,
-        default=Role.DEFAULT_USER,
-        verbose_name=_('Role')
-    )
+    role = models.CharField(max_length=50, choices=Role.choices, default=Role.DEFAULT_USER, verbose_name=_('Role'))
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -1549,8 +1547,16 @@ class User(AbstractUser):
     def has_role(self, role):
         return self.role == role
 
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Check if this is a new object being created
+            self.is_active = False  # Do not activate on save, wait for approval
+        super().save(*args, **kwargs)
+        # If a specific role requires admin approval, you might adjust the logic here
+        if not self.is_approved and self.role in [self.Role.WAREHOUSE_ADMIN, self.Role.OPERATIONAL_MANAGER]:
+            send_admin_approval_request(self)  # Calling the function when needed
+        super().save(*args, **kwargs)
+
 class Employee(models.Model):
-    employee_number = models.CharField(max_length=7, unique=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
     first_name = models.CharField(max_length=255, verbose_name=_('First Name'))
     last_name = models.CharField(max_length=255, verbose_name=_('Last Name'))

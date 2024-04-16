@@ -114,3 +114,34 @@ a:hover {
 .text-center a:hover {
     text-decoration: underline;
 }
+.form-control, .form-control select, .form-control textarea {
+    width: 100%; /* Ensures that the element fills the width of its parent */
+    padding: 10px; /* Same padding for all input types */
+    border-radius: 5px; /* Consistent border radius */
+    border: 1px solid #ccc; /* Consistent border width and color */
+    box-sizing: border-box; /* The width and height properties (and min/max properties) includes content, padding and border, but not the margin */
+}
+@media screen and (orientation: landscape) {
+    .register-container {
+        max-width: 600px; /* Increased width for landscape */
+        padding: 1em; /* Reduced padding */
+    }
+
+    .form-group {
+        margin-bottom: 10px; /* Reduced space between form fields */
+    }
+
+    .form-control, .form-control select, .form-control textarea {
+        padding: 8px; /* Reduced padding within form elements */
+        font-size: 14px; /* Reduced font size if necessary */
+    }
+
+    .btn-primary {
+        padding: 8px 20px; /* Adjust button padding if needed */
+    }
+
+    /* Additional styles to optimize the layout */
+    .agreement label {
+        font-size: 0.9em; /* Slightly smaller font for the agreement label */
+    }
+}

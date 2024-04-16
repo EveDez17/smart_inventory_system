@@ -3,8 +3,13 @@ from warehouse.inventory.models import CMR, Category, LoaderTask, Report, Transa
 from django.contrib import admin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth import get_user_model
 from warehouse.inventory.models import User, Employee
 
+# Get the custom User model
+User = get_user_model()
+
+# Define the custom forms for User creation and modification
 class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
@@ -15,38 +20,46 @@ class CustomUserChangeForm(UserChangeForm):
         model = User
         fields = ('email', 'role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
 
+# Define the custom UserAdmin
 class CustomUserAdmin(UserAdmin):
     form = CustomUserChangeForm
     add_form = CustomUserCreationForm
     model = User
-    list_display = ('email', 'role', 'is_staff', 'is_active')
-    list_filter = ('role', 'is_staff', 'is_active')
+    list_display = ('email', 'role', 'is_staff', 'is_active',)
+    list_filter = ('role', 'is_staff', 'is_active',)
     fieldsets = (
-        ('User Info', {'fields': ('email', 'password')}),
+        ('User Info', {'fields': ('email', 'password',)}),
         ('Role', {'fields': ('role',)}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions',)}),
+        ('Important dates', {'fields': ('last_login', 'date_joined',)}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'role', 'is_active', 'is_staff')
+            'fields': ('email', 'password1', 'password2', 'role', 'is_active', 'is_staff',)
         }),
     )
     search_fields = ('email',)
     ordering = ('email',)
 
+# Attempt to unregister the existing User admin if it has been registered previously.
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
 
 admin.site.register(User, CustomUserAdmin)
+
+# Register other models
 admin.site.register(Employee)
+admin.site.register(Category)
+# ... register other models ...
 
 # Customizing the admin site's header, title, and index title
 admin.site.site_header = "Warehouse Inventory Management Admin"
 admin.site.site_title = "Warehouse Inventory Site Admin"
 admin.site.index_title = "Warehouse Inventory Overview"
 
-
-admin.site.register(Category)
 
 
 

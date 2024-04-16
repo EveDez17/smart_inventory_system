@@ -160,3 +160,6 @@ CELERY_TIMEZONE = 'UTC'
 
 #Custom User
 AUTH_USER_MODEL = 'inventory.User'
+
+#Custom Cookie
+CSRF_FAILURE_VIEW = 'warehouse.demo.views.csrf_failure'

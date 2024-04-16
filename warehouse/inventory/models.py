@@ -1550,6 +1550,7 @@ class User(AbstractUser):
         return self.role == role
 
 class Employee(models.Model):
+    employee_number = models.CharField(max_length=7, unique=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
     first_name = models.CharField(max_length=255, verbose_name=_('First Name'))
     last_name = models.CharField(max_length=255, verbose_name=_('Last Name'))

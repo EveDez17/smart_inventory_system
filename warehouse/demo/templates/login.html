@@ -40,7 +40,7 @@
         <form method="post" class="login-form">
             {% csrf_token %}
             <div class="form-group">
-                <input type="text" id="username" name="username" placeholder="Username" required class="form-control">
+                <input type="text" id="username" name="username" placeholder="Email" required class="form-control">
             </div>
             <div class="form-group">
                 <input type="password" id="password" name="password" placeholder="Password" required class="form-control">
@@ -66,6 +66,11 @@
 {% endblock content %}
 
 {% block scripts %}
+!-- Load jQuery first -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<!-- Then load your custom AJAX login script -->
+<script src="{% static 'js/login.js' %}"></script>
+
 <script src="{% static 'js/badge_status.js' %}"></script>
 {% endblock scripts %}
 

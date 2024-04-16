@@ -1,32 +1,49 @@
 from django.contrib import admin
 from warehouse.inventory.models import CMR, Category, LoaderTask, Report, Transaction
-
 from django.contrib import admin
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.admin import UserAdmin
 from warehouse.inventory.models import User, Employee
 
+class CustomUserCreationForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ('email', 'role')
+
+class CustomUserChangeForm(UserChangeForm):
+    class Meta(UserChangeForm.Meta):
+        model = User
+        fields = ('email', 'role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
+
 class CustomUserAdmin(UserAdmin):
+    form = CustomUserChangeForm
+    add_form = CustomUserCreationForm
     model = User
     list_display = ('email', 'role', 'is_staff', 'is_active')
-    list_filter = ('email', 'role', 'is_staff', 'is_active')
+    list_filter = ('role', 'is_staff', 'is_active')
     fieldsets = (
-        (None, {'fields': ('email', 'password', 'role')}),
-        ('Permissions', {'fields': ('is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('User Info', {'fields': ('email', 'password')}),
+        ('Role', {'fields': ('role',)}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'role', 'is_active', 'is_staff')}
-        ),
+            'fields': ('email', 'password1', 'password2', 'role', 'is_active', 'is_staff')
+        }),
     )
     search_fields = ('email',)
     ordering = ('email',)
 
+
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Employee)
 
-
+# Customizing the admin site's header, title, and index title
+admin.site.site_header = "Warehouse Inventory Management Admin"
+admin.site.site_title = "Warehouse Inventory Site Admin"
+admin.site.index_title = "Warehouse Inventory Overview"
 
 
 admin.site.register(Category)

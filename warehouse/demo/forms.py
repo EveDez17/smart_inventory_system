@@ -3,6 +3,8 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import gettext_lazy as _
 from warehouse.inventory.models import User, Employee, Address
+import random
+import string
 
 class EmployeeRegistrationForm(UserCreationForm):
     first_name = forms.CharField(max_length=255, required=True, help_text=_('Input first name'))
@@ -23,14 +25,28 @@ class EmployeeRegistrationForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ('first_name', 'last_name', 'email', 'password1', 'password2',
-                  'personal_email', 'dob', 'contact_number', 'start_date', 'address', 'position')
+        fields = (
+            'first_name', 'last_name', 'email', 'personal_email', 'password1', 'password2', 'contact_number', 'position'
+        )
+
+    def generate_unique_employee_number(self):
+        while True:
+            letters = ''.join(random.choices(string.ascii_uppercase, k=3))
+            numbers = ''.join(random.choices(string.digits, k=4))
+            employee_number = f"{letters}{numbers}"
+            if not Employee.objects.filter(employee_number=employee_number).exists():
+                break
+        return employee_number
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.username = self.cleaned_data['email']
         if commit:
             user.save()
+
+            # Ensure the employee_number field exists on the Employee model
+            employee_number = self.generate_unique_employee_number()
+
             employee = Employee(
                 user=user,
                 first_name=self.cleaned_data['first_name'],
@@ -41,6 +57,7 @@ class EmployeeRegistrationForm(UserCreationForm):
                 address=self.cleaned_data['address'],
                 position=self.cleaned_data['position'],
                 start_date=self.cleaned_data['start_date'],
+                employee_number=employee_number,  # This line sets the unique employee number
             )
             employee.save()
         return user

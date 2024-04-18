@@ -1,0 +1,12 @@
+{% extends 'base.html' %}  <!-- Make sure this is the correct path to your base template -->
+
+{% block title %}Account Pending Approval{% endblock title %}
+
+{% block content %}
+<div class="container">
+    <h1>Account Pending Approval</h1>
+    <p>Thank you for registering! Your account is currently pending approval by an administrator. You will receive an email once your account has been activated.</p>
+    <a href="{% url 'demo:home' %}">Return to home page</a> <!-- Replace 'home' with the actual name of your home URL pattern -->
+</div>
+{% endblock content %}
+

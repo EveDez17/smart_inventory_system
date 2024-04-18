@@ -1,0 +1,83 @@
+/* base.css */
+:root {
+    --primary-color: #005288; /* Dark blue */
+    --secondary-color: #00A3FF; /* Light blue */
+    --text-color: #050607; /* Almost black */
+    --button-color: #5cb85c; /* Green */
+    --button-hover-color: #4cae4c; /* Dark green */
+    --error-color: #D8000C; /* Red */
+    --error-background: #FFD2D2; /* Light red */
+}
+
+*, *::before, *::after {
+    box-sizing: border-box; /* Content-box with padding and border */
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: var(--primary-color);
+    color: var(--text-color);
+}
+
+/* Basic layout */
+.container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+/* Text */
+h1, h2, h3, p, a {
+    color: var(--text-color);
+}
+
+/* Links */
+a {
+    text-decoration: none;
+    color: var(--secondary-color);
+}
+
+a:hover {
+    color: var(--button-hover-color);
+}
+
+/* Buttons and form inputs */
+button,
+input[type="text"],
+input[type="password"],
+input[type="email"],
+select,
+textarea {
+    background-color: var(--button-color);
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    width: 100%; /* Takes full parent width */
+}
+
+button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover {
+    background-color: var(--button-hover-color);
+}
+
+/* Error styles */
+.error-message,
+.input-error {
+    color: var(--error-color);
+    background-color: var(--error-background);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    /* Adapt your layout for smaller screens */
+}
+

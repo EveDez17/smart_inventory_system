@@ -1515,7 +1515,7 @@ from warehouse.inventory.managers import UserManager
 class User(AbstractUser):
     username = None  # We're using email instead of username
     email = models.EmailField(_('email address'), unique=True)
-    is_approved = models.BooleanField(default=False, verbose_name=_('Is Approved'))  # Field to track approval status
+    is_approved = models.BooleanField(default=False)  # Field to track approval status
     
     class Role(models.TextChoices):
         DEFAULT_USER = "DEFAULT_USER", _('Default User')

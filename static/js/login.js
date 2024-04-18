@@ -9,23 +9,33 @@ $(function() {
     });
 
     function getCsrfToken() {
-        return document.querySelector('[name="csrfmiddlewaretoken"]').value;
+        return $('input[name="csrfmiddlewaretoken"]').val();  // Simplified CSRF token retrieval
     }
 
+    // Login form submission event handler
     $('#login-form').submit(function(e) {
         e.preventDefault();
+        
         const postData = {
-            username: $('#username').val(),
-            password: $('#password').val(),
-            csrfmiddlewaretoken: getCsrfToken()  // Make sure CSRF token is included here as well
+            username: $('#username').val().trim(),  // Trim inputs to remove accidental whitespace
+            password: $('#password').val().trim(),
+            csrfmiddlewaretoken: getCsrfToken()  // Ensure CSRF token is included
         };
+
         $.post(this.action, postData, function(response) {
-            window.location.href = "/dashboard/";
+            // Assume response contains a JSON object with a 'redirect' field
+            if (response.redirect) {
+                window.location.href = response.redirect;  // Use redirect URL provided by the server
+            } else {
+                alert('Login successful - redirect path missing in response.');
+            }
         }).fail(function(xhr) {
-            alert("Login failed: " + xhr.responseText);  // Include server response to aid debugging
+            var errorMsg = "Login failed: " + (xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText);
+            alert(errorMsg);  // Enhanced error handling
         });
     });
 });
+
     function getCookie(name) {
         let cookie = null;
         if (document.cookie && document.cookie !== '') {

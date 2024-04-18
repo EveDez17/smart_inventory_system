@@ -19,13 +19,14 @@ from warehouse.inventory.routing import application
 
 
 
-@pytest.mark.django_db
+
 @pytest.mark.parametrize("name, slug, is_active", [
     ("ambient food", "ambient-food", True),
     ("chilled food", "chilled-food", True),
     ("fresh", "fresh", True),
     ("frozen food", "frozen-food", True),
 ])
+@pytest.mark.django_db
 def test_inventory_category_creation(db, name, slug, is_active):
     category = CategoryFactory(name=name, slug=slug, is_active=is_active, generate_weight=None)  # Explicitly override generate_weight here if not part of the model
     

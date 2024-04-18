@@ -32,10 +32,16 @@ class EmployeeRegistrationForm(forms.ModelForm):
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
-            'dob': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'Date of Birth'}),
+            'dob': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'personal_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Personal Email'}),
             'contact_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contact Number'}),
             'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address'}),
             'position': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Position'}),
-            'start_date': forms.DateInput(attrs={'class': 'form-control', 'placeholder': 'Start Date'}),
+            'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
+    def __init__(self, *args, **kwargs):
+        super(EmployeeRegistrationForm, self).__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs['class'] = 'form-control'
+            if self.errors.get(field):  # If there is an error on the field
+                self.fields[field].widget.attrs['class'] += ' error'

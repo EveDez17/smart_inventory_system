@@ -1,6 +1,7 @@
 from django.contrib import admin
 from warehouse.inventory.models import CMR, Category, LoaderTask, Report, Transaction
 from django.contrib import admin
+from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth import get_user_model
@@ -47,6 +48,16 @@ try:
     admin.site.unregister(User)
 except admin.sites.NotRegistered:
     pass
+    actions = ['approve_users']
+
+    def approve_users(self, request, queryset):
+        count = queryset.update(is_approved=True)
+        if count == 1:
+            message_bit = "1 user was"
+        else:
+            message_bit = f"{count} users were"
+        self.message_user(request, f"{message_bit} successfully approved.", messages.SUCCESS)
+    approve_users.short_description = "Approve selected users"
 
 admin.site.register(User, CustomUserAdmin)
 

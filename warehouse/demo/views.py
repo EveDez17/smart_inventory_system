@@ -24,7 +24,7 @@ def csrf_failure(request, reason=""):
     return render(request, "errors/csrf_failure.html", context)
 #Base Page
 def home(request):
-    return render(request, "base.html")
+    return render(request, "home.html")
 
 #Login Page
 logger = logging.getLogger(__name__)

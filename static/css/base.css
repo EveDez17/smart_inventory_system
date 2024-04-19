@@ -9,75 +9,13 @@
     --error-background: #FFD2D2; /* Light red */
 }
 
-*, *::before, *::after {
-    box-sizing: border-box; /* Content-box with padding and border */
-}
-
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: Arial, sans-serif;
+footer {
     background-color: var(--primary-color);
-    color: var(--text-color);
-}
-
-/* Basic layout */
-.container {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-}
-
-/* Text */
-h1, h2, h3, p, a {
-    color: var(--text-color);
-}
-
-/* Links */
-a {
-    text-decoration: none;
-    color: var(--secondary-color);
-}
-
-a:hover {
-    color: var(--button-hover-color);
-}
-
-/* Buttons and form inputs */
-button,
-input[type="text"],
-input[type="password"],
-input[type="email"],
-select,
-textarea {
-    background-color: var(--button-color);
     color: white;
+    position: fixed;
+    right: 0;
+    bottom: 0;
     padding: 10px;
-    border: none;
-    border-radius: 5px;
-    margin-top: 10px;
-    width: 100%; /* Takes full parent width */
+    width: 100%;
+    text-align: right;
 }
-
-button:hover,
-input[type="submit"]:hover,
-input[type="button"]:hover {
-    background-color: var(--button-hover-color);
-}
-
-/* Error styles */
-.error-message,
-.input-error {
-    color: var(--error-color);
-    background-color: var(--error-background);
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-    /* Adapt your layout for smaller screens */
-}
-

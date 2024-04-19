@@ -6,7 +6,7 @@ from .views import pending_approval, register
 app_name = "demo"
 
 urlpatterns = [
-    path('', views.home, name="home"),
+    path('home/', views.home, name="home"),
     path('login/', views.login_view, name='login'),
     path('register/', register, name='register'),
     path('pending_approval/', pending_approval, name='pending_approval'),

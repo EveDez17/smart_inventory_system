@@ -1,0 +1,116 @@
+@charset "UTF-8";
+
+/* home.css */
+html, body {
+    height: 100%;
+    margin: 0;
+    background-image: url('/static/images/login.jpg'); /* Add your background image path here */
+    background-size: cover; /* Cover the entire area of the page */
+    background-position: center;
+    /* Set up the background image slide-in animation */
+    animation: slideInBackground 2s ease-out forwards;
+}
+
+/* Keyframes for background image slide-in */
+@keyframes slideInBackground {
+    from {
+      background-position: 100% 50%;
+    }
+    to {
+      background-position: 50% 50%;
+    }
+  }
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    animation: slideInMessage 2s ease-out forwards;
+}
+/* Keyframes for message container slide-in */
+@keyframes slideInMessage {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+.row {
+    width: 100%; /* Full width of the container */
+}
+
+.col-sm-11.col-md-4.mx-auto.mt-5.px-3 {
+    margin: 0; /* Override any default margins if needed */
+    padding: 1rem; /* Adjust padding as needed */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background for the text container */
+    border-radius: 10px; /* Optional: if you want rounded corners */
+    color: white; /* Ensuring text color is white for readability */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Adjustments for smaller screens, if necessary */
+@media (max-width: 768px) {
+    .col-sm-11.col-md-4.mx-auto.mt-5.px-3 {
+        padding: 1rem;
+    }
+}
+
+.btn-primary {
+    background-color: var(--button-color); /* Primary button color */
+    color: white; /* Text color */
+    padding: 12px 25px; /* Top/bottom and left/right padding */
+    font-size: 16px; /* Text size */
+    border: none; /* No border */
+    border-radius: 25px; /* Rounded corners with a large radius for pill shape */
+    text-transform: uppercase; /* Capitalize all letters */
+    font-weight: bold; /* Bold text */
+    letter-spacing: 1px; /* Space out the letters slightly */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover effects */
+    text-decoration: none; /* No underline on the text */
+    display: inline-block; /* Allows padding and width to affect the element */
+    cursor: pointer; /* Changes the cursor to indicate it's clickable */
+}
+
+.btn-primary:hover {
+    background-color: var(--button-hover-color); /* Color when hovered */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Larger shadow when hovered for a 'lifting' effect */
+}
+
+/* Additional styles for centering the message and button */
+.message-container {
+    background-color: var(--primary-color); /* Use your secondary color or any other color */
+    padding: 30px; /* Add some padding */
+    text-align: center; /* Center text */
+    border-radius: 10px;
+    color: white; /* Optional: if you want rounded corners */
+}
+
+.message-container h1,
+.message-container p {
+    color: white; /* This will ensure the text is white */
+}
+
+/* If you need to further center this container itself within another part of the page */
+.outer-container {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100vh; /* Take up full viewport height */
+}
+
+/* Adjustments for the button, if needed */
+.btn-primary {
+    /* Previous styles */
+    margin-top: 20px; /* Add space above the button */
+}
+
+/* Media query adjustments, if needed for responsiveness */
+@media (max-width: 768px) {
+    .message-container {
+        padding: 20px;
+    }
+}

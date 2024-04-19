@@ -1,44 +1,27 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://bootswatch.com/5/lumen/bootstrap.min.css" rel="stylesheet">
-
-    <title>Route69-SIS</title>
-
-    <style>
-        body {
-            background-color: #f2f2f2; /* Light gray background color */
-        }
-    </style>
+    <title>{% block title %}Route69 | Smart Inventory System{% endblock %}</title>
+    {% block extra_styles %}{% endblock extra_styles %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
 <body>
-    <div>
-        <div class="row">
-            <div class="col-sm-11 col-md-4 mx-auto mt-5 px-3">
-                <h1 class="fw-light">Track and Manage Your Inventory</h1>
-                <p class="fw-light">Keep track of your inventory and receive quantity alerts for low inventory</p>
-    
-                <div>
-                    <a href="{% url 'demo:login' %}" class="btn btn-primary">Get Started Now!</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% include 'navigation.html' %}
 
-    {% block content %}
-    {% endblock content %}
-    
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
-    
-    <!-- Custom JavaScript Files -->
-    {% block javascript %}
-    
-    {% endblock javascript %}
+    <main>
+        <!-- Main content will be overridden by child templates -->
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <!-- Footer content -->
+        <p>Copyright © {% now "Y" %} E-ITech</p>
+    </footer>
+
+    <!-- JS files -->
+   
 </body>
 </html>

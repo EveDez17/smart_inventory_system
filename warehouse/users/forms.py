@@ -1,46 +1,56 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.utils.translation import gettext_lazy as _
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from .models import User, Employee
+from django.contrib.auth import get_user_model
+from .models import Employee, Role
 
-class UserRegistrationForm(UserCreationForm):
-    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))
+User = get_user_model()
 
-    class Meta(UserCreationForm.Meta):
+class CustomUserCreationForm(UserCreationForm):
+    first_name = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    phone_number = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    is_approved = forms.BooleanField(required=False, initial=False, label=_("Approve User"))
+
+    class Meta:
         model = User
-        fields = ('email', 'role', 'password1', 'password2')
+        fields = ('username', 'first_name', 'last_name', 'email', 'phone_number', 'password1', 'password2', 'is_approved')
         widgets = {
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
-            'role': forms.Select(attrs={'class': 'form-control'}),
-            'password1': forms.PasswordInput(attrs={'class': 'form-control'}),
-            'password2': forms.PasswordInput(attrs={'class': 'form-control'}),
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
         }
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
-        if commit:
-            user.save()
-        return user
+
+class CustomUserChangeForm(UserChangeForm):
+    first_name = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(max_length=100, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    phone_number = forms.CharField(max_length=15, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    is_approved = forms.BooleanField(required=False, label=_("Approve User"))
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email', 'phone_number', 'is_approved', 'password')
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+        }
 
 class EmployeeRegistrationForm(forms.ModelForm):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))  # Assuming email is here for simplicity
+
     class Meta:
         model = Employee
-        fields = ('first_name', 'last_name', 'dob', 'personal_email', 'contact_number', 'address', 'position', 'start_date')
+        fields = ('employee_first_name', 'employee_last_name', 'employee_street_number', 'employee_street_name',
+                  'employee_city', 'employee_county', 'employee_country', 'employee_post_code', 'date_hired', 'role', 'email')
         widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
-            'dob': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'personal_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Personal Email'}),
-            'contact_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contact Number'}),
-            'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Address'}),
-            'position': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Position'}),
-            'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'employee_first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'employee_last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'employee_street_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'employee_street_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'employee_city': forms.TextInput(attrs={'class': 'form-control'}),
+            'employee_county': forms.TextInput(attrs={'class': 'form-control'}),
+            'employee_country': forms.TextInput(attrs={'class': 'form-control'}),
+            'employee_post_code': forms.TextInput(attrs={'class': 'form-control'}),
+            'date_hired': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'role': forms.Select(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),  # Managed here for simplicity
         }
-    def __init__(self, *args, **kwargs):
-        super(EmployeeRegistrationForm, self).__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs['class'] = 'form-control'
-            if self.errors.get(field):  # If there is an error on the field
-                self.fields[field].widget.attrs['class'] += ' error'

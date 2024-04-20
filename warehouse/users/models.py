@@ -1,20 +1,23 @@
 #USER SETUP TO LOGIN
-
-from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.conf import settings
-from warehouse.users.utils import send_admin_approval_request
+
 from warehouse.users.managers import UserManager
 
-class User(AbstractUser):
-    username = None  # We're using email instead of username
-    email = models.EmailField(_('email address'), unique=True)
-    is_approved = models.BooleanField(default=False)  # Field to track approval status
-    
-    class Role(models.TextChoices):
-        DEFAULT_USER = "DEFAULT_USER", _('Default User')
-        SECURITY = "SECURITY", _('Security')
+class Department(models.Model):
+    department_name = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.department_name
+
+class Role(models.Model):
+    class RoleChoices(models.TextChoices):
+        WAREHOUSE_COMMON = "WAREHOUSE_COMMON", _('Warehouse Common')
+        GATEHOUSE = "GATEHOUSE", _('Gatehouse')
         RECEPTIONIST = "RECEPTIONIST", _('Receptionist')
         WAREHOUSE_OPERATIVE = "WAREHOUSE_OPERATIVE", _('Warehouse Operative')
         WAREHOUSE_ADMIN = "WAREHOUSE_ADMIN", _('Warehouse Admin')
@@ -25,47 +28,52 @@ class User(AbstractUser):
         INVENTORY_MANAGER = "INVENTORY_MANAGER", _('Inventory Manager')
         OPERATIONAL_MANAGER = "OPERATIONAL_MANAGER", _('Operational Manager')
 
-    role = models.CharField(max_length=50, choices=Role.choices, default=Role.DEFAULT_USER, verbose_name=_('Role'))
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
-
-    objects = UserManager()
-
-    class Meta:
-        verbose_name = _('User')
-        verbose_name_plural = _('Users')
+    role_title = models.CharField(
+        max_length=100,
+        choices=RoleChoices.choices,
+        default=RoleChoices.WAREHOUSE_COMMON,
+        verbose_name=_("Role Title")
+    )
+    role_description = models.TextField(verbose_name=_("Role Description"))
 
     def __str__(self):
-        return self.email
+        return self.get_role_title_display()
+    
 
-    def has_role(self, role):
-        return self.role == role
+class User(AbstractUser):
+    employee = models.OneToOneField('Employee', on_delete=models.CASCADE, related_name='user_profile', null=True, blank=True)
 
-    def save(self, *args, **kwargs):
-        if not self.pk:  # Check if this is a new object being created
-            self.is_active = False  # Do not activate on save, wait for approval
-        super().save(*args, **kwargs)
-        # If a specific role requires admin approval, you might adjust the logic here
-        if not self.is_approved and self.role in [self.Role.WAREHOUSE_ADMIN, self.Role.OPERATIONAL_MANAGER]:
-            send_admin_approval_request(self)  # Calling the function when needed
-        super().save(*args, **kwargs)
+    is_approved = models.BooleanField(default=False)
+
+    objects = UserManager()  # Using the custom user manager
+
+    def get_absolute_url(self):
+        return reverse("users:detail", kwargs={"username": self.username})
+
+    def __str__(self):
+        if self.employee:
+            return f"{self.employee.employee_first_name} {self.employee.employee_last_name} ({self.username})"
+        return self.username
 
 class Employee(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
-    first_name = models.CharField(max_length=255, verbose_name=_('First Name'))
-    last_name = models.CharField(max_length=255, verbose_name=_('Last Name'))
-    dob = models.DateField(verbose_name=_('Date of Birth'))
-    personal_email = models.EmailField(unique=True, verbose_name=_('Personal Email'))
-    contact_number = models.CharField(max_length=20, verbose_name=_('Contact Number'))
-    address = models.TextField(verbose_name=_('Address'))  # Assuming you have Address as a model or change to appropriate field type
-    position = models.CharField(max_length=100, verbose_name=_('Position'))
-    start_date = models.DateField(verbose_name=_('Start Date'))
-
-    class Meta:
-        db_table = 'employee'
-        verbose_name = _('Employee')
-        verbose_name_plural = _('Employees')
-
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee_profile')  # Adjusted related_name
+    employee_first_name = models.CharField(max_length=100)
+    employee_last_name = models.CharField(max_length=100)
+    employee_street_number = models.CharField(max_length=128)
+    employee_street_name = models.CharField(max_length=255)
+    employee_city = models.CharField(max_length=255)
+    employee_county = models.CharField(max_length=255)
+    employee_country = models.CharField(max_length=255)
+    employee_post_code = models.CharField(max_length=20, unique=True)
+    date_hired = models.DateField(default=timezone.now) 
+    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True, related_name='employees')
+    
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.employee_first_name} {self.employee_last_name}"
+    
+class EmployeeRole(models.Model):
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    assigned_date = models.DateField()  
+    
+

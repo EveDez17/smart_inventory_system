@@ -1,10 +1,11 @@
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
-from warehouse.users.admin import CustomUserCreationForm
-from warehouse.users.models import User
+from django.contrib.auth.decorators import permission_required, login_required
+from django.shortcuts import redirect, render, get_object_or_404
+from warehouse.users.models import Employee, User
 from .forms import EmployeeRegistrationForm
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import login, update_session_auth_hash
 import qrcode
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -12,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from io import BytesIO
 from django.middleware.csrf import get_token
-from django.contrib import messages
+from django.core.mail import send_mail
 from django.middleware.csrf import get_token
 import logging
 
@@ -79,6 +80,7 @@ def ajax_login_view(request):
             return JsonResponse({'success': False, 'error': 'Invalid username or password.'})
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+    
 #QRcode Login 
 def login_with_qr(request, login_token):
     # Replace this with your actual logic for token verification and user authentication
@@ -93,60 +95,6 @@ def login_with_qr(request, login_token):
         # Handle invalid login token (e.g., show an error page)
         return redirect('invalid_login')  
     
-#Register Page
-def register(request):
-    if request.method == 'POST':
-        user_form = CustomUserCreationForm(request.POST)
-        employee_form = EmployeeRegistrationForm(request.POST)
-        
-        # Check if 'terms' checkbox is checked
-        if 'terms' not in request.POST:
-            messages.error(request, "You must agree to the terms to register.")
-        elif user_form.is_valid() and employee_form.is_valid():
-            user = user_form.save(commit=False)
-            user.is_active = False  # User will not be active until approved
-            user.save()
-            
-            employee = employee_form.save(commit=False)
-            employee.user = user
-            employee.save()
-            
-            # Optionally send an email here for account verification or admin approval
-            
-            messages.success(request, "Your account has been created and is pending approval.")
-            return redirect('pending_approval')  # Redirect to a pending approval page
-        else:
-            # If the forms have errors, these will be passed to the template and displayed
-            messages.error(request, "Please correct the errors below.")
-        
-        # Render the same page with the form data filled in and errors shown
-        return render(request, 'registration/register.html', {
-            'user_form': user_form,
-            'employee_form': employee_form
-        })
-
-    else:
-        user_form = CustomUserCreationForm()
-        employee_form = EmployeeRegistrationForm()
-
-    return render(request, 'registration/register.html', {
-        'user_form': user_form,
-        'employee_form': employee_form
-    })
-
-def pending_approval(request):
-    return render(request, 'registration/pending_approval.html')
-
-@login_required
-@permission_required('is_superuser')
-def approve_user(request, user_id):
-    user = User.objects.get(id=user_id)
-    user.is_approved = True
-    user.save()
-    # Redirect to the user list page or wherever is appropriate
-    return redirect('user_list')
-
-
 #QRcode Function
 def generate_qr(request):
     # Generate a unique token for the user session (replace with your actual logic)
@@ -177,6 +125,83 @@ def generate_qr(request):
     img_response = HttpResponse(content_type="image/png")
     img.save(img_response, "PNG")
     return img_response
+    
+#Register Page
+def register(request):
+    if request.method == 'POST':
+        form = EmployeeRegistrationForm(request.POST)
+        if form.is_valid():
+            # Save the form data without committing to the database
+            employee = form.save(commit=False)
+
+            # Get the email from the form's cleaned data
+            email = form.cleaned_data['email']
+
+            # Create a new User instance and associate it with the Employee
+            user = User.objects.create_user(
+                username=email.split('@')[0],  # Derive username from email
+                email=email,
+                password=User.objects.make_random_password()
+            )
+            employee.user = user
+
+            # Save both Employee and User instances
+            employee.save()
+            user.save()
+
+            return redirect('users:pending_approval')
+        else:
+            return render(request, 'registration/register.html', {'form': form})
+    else:
+        form = EmployeeRegistrationForm()
+    return render(request, 'registration/register.html', {'form': form})
+@login_required
+@permission_required('users.can_approve_employee', raise_exception=True)
+def approve_user(request, employee_id):
+    employee = get_object_or_404(Employee, id=employee_id)
+    if not employee.user:  # Ensure no User is linked yet
+        user = User.objects.create_user(
+            username=employee.email.split('@')[0],  # Assuming username is derived from email
+            email=employee.email,
+            password=User.objects.make_random_password()
+        )
+        employee.user = user
+        employee.user.is_approved = True
+        employee.user.is_active = True  # Optionally activate the user immediately
+        employee.user.save()
+        employee.save()
+        send_mail(
+            'Your Account Has Been Approved',
+            'Here are your login credentials. Username: {} \nPlease reset your password upon first login.'.format(user.username),
+            'from@example.com',
+            [user.email],
+            fail_silently=False,
+        )
+        return redirect('user_list')
+    else:
+        return render(request, 'registration/registration_error.html', {'message': 'This employee already has a linked user account.'})
+
+def user_password_reset(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important to keep the user logged in
+            return redirect('password_reset_done')
+        else:
+            return render(request, 'registration/password_reset.html', {'form': form})
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'registration/password_reset.html', {'form': form})
+
+@login_required
+@permission_required('users.can_view_pending', raise_exception=True)
+def pending_approval(request):
+    employees_pending = Employee.objects.filter(user__is_approved=False)
+    return render(request, 'users/pending_approval.html', {'employees': employees_pending})
+
+
+
 
 #Dashboard Page
 def dashboard(request):

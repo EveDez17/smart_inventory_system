@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Approve User</h2>
+<form method="post">
+    {% csrf_token %}
+    <p>Are you sure you want to approve {{ user.username }}?</p>
+    <button type="submit">Approve</button>
+    <a href="{% url 'users:user_list' %}">Cancel</a>
+</form>
+{% endblock %}

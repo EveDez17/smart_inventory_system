@@ -22,7 +22,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('warehouse.demo.urls')),  # No need for the 'namespace' if you're not using it
+    path('', include('warehouse.users.urls')),  # No need for the 'namespace' if you're not using it
     # Other global paths can be added here.
 ]
 

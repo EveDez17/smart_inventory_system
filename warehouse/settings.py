@@ -38,9 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'warehouse.dashboard',
     'warehouse.inventory.apps.InventoryConfig',
-    'warehouse.demo.apps.DemoConfig',
+    'warehouse.users.apps.UsersConfig',
     'crispy_forms',
     'crispy_bootstrap5',
     'simple_history',
@@ -91,10 +90,10 @@ WSGI_APPLICATION = 'warehouse.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',                # This should match POSTGRES_DB from your Docker Compose file
+        'NAME': 'lp_db',                # This should match POSTGRES_DB from your Docker Compose file
         'USER': 'postgres',                # This should match POSTGRES_USER from your Docker Compose file
         'PASSWORD': 'superuser',  # This should match POSTGRES_PASSWORD from your Docker Compose file
-        'HOST': '127.0.0.1',               # Use 'localhost' or '127.0.0.1' for local development
+        'HOST': 'localhost',               # Use 'localhost' or '127.0.0.1' for local development
         'PORT': '5432',                    # Default PostgreSQL port
     }
 }
@@ -159,10 +158,10 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
 #Custom User
-AUTH_USER_MODEL = 'inventory.User'
+AUTH_USER_MODEL = 'users.User'
 
 #Custom Cookie
-CSRF_FAILURE_VIEW = 'warehouse.demo.views.csrf_failure'
+CSRF_FAILURE_VIEW = 'warehouse.users.views.csrf_failure'
 
 # Email settings for sending mail
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

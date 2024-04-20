@@ -1,18 +1,12 @@
-:root {
-    --primary-color: #005288; /* Dark blue background */
-    --secondary-color: #00A3FF; /* Light blue accent */
-    --text-color: #E1E9F0; /* Light text color */
-    --button-color: #5cb85c; /* Button color */
-    --button-hover-color: #4cae4c; /* Button hover color */
-}
 
 /* register.css */
 .register-page {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background-color: var(--primary-color); /* Your primary color */
+    position: absolute;
+    top: 14px;
+    left: 12px;
+    width: 1418px;
+    height: 874px;
+    border-radius: 0px;
 }
 
 .register-container {

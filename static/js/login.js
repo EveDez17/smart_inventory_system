@@ -1,4 +1,8 @@
 $(function() {
+    function getCsrfToken() {
+        return $('input[name="csrfmiddlewaretoken"]').val();
+    }
+
     // Set CSRF token as header for all AJAX POST requests
     $.ajaxSetup({
         beforeSend: function(xhr, settings) {
@@ -8,30 +12,30 @@ $(function() {
         }
     });
 
-    function getCsrfToken() {
-        return $('input[name="csrfmiddlewaretoken"]').val();  // Simplified CSRF token retrieval
-    }
-
-    // Login form submission event handler
-    $('#login-form').submit(function(e) {
+    $('.login-form').submit(function(e) {
         e.preventDefault();
-        
         const postData = {
-            username: $('#username').val().trim(),  // Trim inputs to remove accidental whitespace
+            username: $('#username').val().trim(),
             password: $('#password').val().trim(),
-            csrfmiddlewaretoken: getCsrfToken()  // Ensure CSRF token is included
+            csrfmiddlewaretoken: getCsrfToken()
         };
 
-        $.post(this.action, postData, function(response) {
-            // Assume response contains a JSON object with a 'redirect' field
-            if (response.redirect) {
-                window.location.href = response.redirect;  // Use redirect URL provided by the server
-            } else {
-                alert('Login successful - redirect path missing in response.');
+        $.ajax({
+            type: 'POST',
+            url: this.action,
+            data: postData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.redirect) {
+                    window.location.href = response.redirect;
+                } else {
+                    $("#login-error").text('Login successful - redirect path missing in response.').show();
+                }
+            },
+            error: function(xhr) {
+                const errorMsg = "Login failed: " + (xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText);
+                $("#login-error").text(errorMsg).show();
             }
-        }).fail(function(xhr) {
-            var errorMsg = "Login failed: " + (xhr.responseJSON ? xhr.responseJSON.message : xhr.responseText);
-            alert(errorMsg);  // Enhanced error handling
         });
     });
 });

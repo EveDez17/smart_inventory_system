@@ -1,8 +1,98 @@
-<!-- dashboard.html -->
 {% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard | Smart Inventory System{% endblock title %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/general_dashboard.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+
+{% endblock extra_styles %}
 
 {% block content %}
-    <h1>Welcome to the Dashboard</h1>
+<div class="container">
+    <img src="{% static 'images/FullLogo.png' %}" alt="Dashboard Logo" class="image">
+    <div class="profile-container">
+        <div class="avatar">
+            <div class="icon">
+                <!-- SVG or other icon content goes here -->
+            </div>
+            <!-- If you have a badge as well, include it like this: -->
+            <div class="user-info">
+                <div class="username">Kevin's workspace</div>
+                <div class="notifications-container">
+                    <button class="notifications-button" type="button">10 Daily notifications</button>
+                    <div class="notifications-dropdown">
+                        <!-- Notification list items -->
+                        <!-- Example notification -->
+                        <div class="notification-item">Notification 1</div>
+                        <div class="notification-item">Notification 2</div>
+                        <!-- Add more notifications here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+      <!-- Sidebar Menu -->
+      <nav class="sidebar-menu">
+        <!-- Sidebar Menu Items -->
+        <div class="sidebar-menu-item selected">
+            <a href="{% url 'dashboard' %}" class="icon-link">
+                <img src="{% static 'icons/home.png' %}" alt="Dashboard Icon" class="icon-placeholder">
+                <span>Dashboard</span>
+            </a>
+            <div class="indicator"></div>
+        </div>
+        <div class="sidebar-menu-item selected">
+            <img src="{% static 'icons/dashboard-icon.png' %}" alt="Dashboard Icon" class="icon-placeholder">
+            <span>Inbound</span>
+            <div class="indicator"></div>
+        </div>
+        <div class="sidebar-menu-item selected">
+            <img src="{% static 'icons/dashboard-icon.png' %}" alt="Dashboard Icon" class="icon-placeholder">
+            <span>Outbound</span>
+            <div class="indicator"></div>
+        </div>
+        <div class="sidebar-menu-item selected">
+            <img src="{% static 'icons/storage.png' %}" alt="Dashboard Icon" class="icon-placeholder">
+            <span>Storage</span>
+            <div class="indicator"></div>
+        </div>
+        <div class="sidebar-menu-item selected">
+            <img src="{% static 'icons/reports.png' %}" alt="Dashboard Icon" class="icon-placeholder">
+            <span>Reports</span>
+            <div class="indicator"></div>
+        </div>
+        <div class="sidebar-menu-item selected">
+            <img src="{% static 'icons/email.png' %}" alt="Dashboard Icon" class="icon-placeholder">
+            <span>Email</span>
+            <div class="indicator"></div>
+        </div>
+        <div class="sidebar-menu-item selected">
+            <img src="{% static 'icons/notifications.png' %}" alt="Dashboard Icon" class="icon-placeholder">
+            <span>Notifications</span>
+            <div class="indicator"></div>
+        </div>
+        <div class="sidebar-menu-item selected">
+            <img src="{% static 'icons/settings.png' %}" alt="Dashboard Icon" class="icon-placeholder">
+            <span>Settings</span>
+            <div class="indicator"></div>
+        </div>
+        <div class="sidebar-menu-item selected">
+            <a href="logout.html">
+                <img src="{% static 'icons/logout.png' %}" alt="Logout Icon" class="icon-placeholder">
+                <span>Log Out</span>
+            </a>
+            <div class="indicator"></div>
+        </div>
+    </nav>
+</div>
+<div class="dashboard-container"> <!-- Wrapper div, you might want to adjust its styling too -->
+    <h1 class="text"> DASHBOARD</h1>
     <!-- Add your dashboard content here -->
+</div>
 {% endblock %}
+{% block extra_scripts %}
+    <script src="{% static 'js/dashboard_notifications.js' %}"></script>
+    <script src="{% static 'js/dashboard_click_item.js' %}"></script>
+{% endblock %}
+
 

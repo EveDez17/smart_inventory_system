@@ -225,4 +225,3 @@ def dashboard(request):
     # You can fetch data or perform any other logic here before rendering the template
     return render(request, 'dashboard.html')
 
-

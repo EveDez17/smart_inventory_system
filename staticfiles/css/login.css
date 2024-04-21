@@ -1,0 +1,258 @@
+/* login.css */
+html, body, .container {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+.container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden; /* Add this to ensure no scrollbars appear */
+}
+
+.left-pane,
+.right-pane {
+    flex: 1;
+    /* Remove position absolute and set display flex here if needed */
+}
+
+.left-pane {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%; /* Assuming you want the image to take half the width of the screen */
+    height: 100vh; /* Assuming you want the image to take full height of the viewport */
+    background-image: url('/static/images/login.jpg');
+    background-size: cover;
+    background-position: center;
+    border-radius: 0; /* No rounded corners */
+}
+
+.right-pane {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2em; /* Consider if this padding is too much */
+    box-sizing: border-box; /* Ensure padding is included in width/height */
+}
+
+.avatar {
+    width: 120px; /* Updated size */
+    height: 120px; /* Updated size */
+    background: #9095A0;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto; /* Added auto to center the avatar horizontally */
+}
+.icon {
+    width: 153px;
+    height: 153px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+/* Badge styles inside the avatar */
+.badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 19px; /* Makes it round */
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #000;
+    border: 1.5px solid #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px; /* Adjust as needed */
+    color: white;
+    transform: translate(50%, 50%); /* Position the badge nicely over the avatar edge */
+}
+
+/* Style adjustments for the avatar based on state classes */
+.avatar.active .badge,
+.avatar.inactive .badge,
+.avatar.idle .badge,
+.avatar.do_not_disturb .badge {
+    opacity: 1; /* Show the badge */
+}
+
+@keyframes flashingRed {
+    0%, 100% { background: #FF0000; } /* Red color */
+    50% { background: #FFFFFF; } /* Transition to white color */
+}
+
+.avatar.do_not_disturb .badge {
+    animation: flashingRed 1s infinite; /* Apply the animation */
+    /* Special styles for do not disturb state, if necessary */
+}
+
+/* Additional styles if you want to adjust the appearance when not flashing */
+.avatar.do_not_disturb .badge:not(.flashing) {
+    background: #FF0000; /* Static red color when not flashing */
+}
+
+/* Textbox styles */
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the children horizontally */
+    justify-content: center; /* Center the children vertically */
+    gap: 1em; /* Space between the children */
+}
+
+.form-container .form-group,
+.form-container p {
+    text-align: center; /* Center align the text */
+    width: 100%;
+     /* Full width to center the text for all screen sizes */
+}
+
+
+/* Styles applied directly to input elements within .textbox containers */
+.textbox input {
+    width: 240px; /* Fixed width */
+    height: 36px;
+    padding: 0 12px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: 400;
+    background: #FFFFFF;
+    border: 1px solid #9095A0;
+    outline: none;
+    
+}
+
+
+/*Login Button */
+.form-container .btn-primary {
+    width: 240px;
+}
+
+/* Input states */
+.textbox input:hover {
+    border-color: #6F7787;
+}
+
+.textbox input:focus {
+    border-color: #9095A0;
+}
+
+.textbox input:disabled {
+    background: #EFEFEF; /* Light gray background for disabled state */
+    border-color: #D0D0D0; /* Light gray border for disabled state */
+}
+
+
+/* QR Code styles */
+.right-pane p,
+.right-pane .qr-login {
+    text-align: center; /* Center-aligns text */
+    width: 100%; /* Ensures the elements take up the full width of their container */
+}
+
+.qr-login {
+    display: flex;
+    flex-direction: column; /* Stacks children vertically */
+    align-items: center; /* Centers children horizontally */
+    justify-content: center; /* Centers children vertically, if there's additional vertical space */
+    width: 100%; /* Takes full width to center content */
+    margin-top: 20px; /* Adds some space above the QR code section */
+}
+
+.qr-login img {
+    width: 150px; /* Set your desired width */
+    height: 150px; /* Set your desired height */
+    margin: 10px auto; /* Center the image horizontally */
+    display: block; /* Ensures the margin auto is effective */
+}
+
+
+/*Color Root applied*/
+
+.left-pane h1 {
+    color: var(--primary-color); /* Dark blue for the main heading */
+}
+
+.left-pane p, .right-pane p, .right-pane a {
+    color: var(--text-color); /* Almost black for other text */
+}
+
+/* Styling the login form inputs and button */
+.textbox input {
+    /* ... existing styles ... */
+    border: 1px solid var(--primary-color); /* Dark blue border for inputs */
+    color: var(--text-color); /* Text color for inputs */
+}
+
+.textbox input:focus {
+    border-color: var(--secondary-color); /* Light blue for input border on focus */
+    outline: none; /* Removes the default focus outline */
+}
+
+.form-container .btn-primary {
+    background-color: var(--button-color); /* Green background for buttons */
+    color: white; /* White text for buttons */
+    border: none; /* Removes the border */
+}
+
+.form-container .btn-primary:hover {
+    background-color: var(--button-hover-color); /* Dark green background for buttons on hover */
+}
+
+/* Styling error messages if any */
+.error-message {
+    color: var(--error-color); /* Red text for error messages */
+    background-color: var(--error-background); /* Light red background for error messages */
+}
+
+/* QR Code instruction text */
+.qr-login p {
+    color: var(--secondary-color); /* Light blue for QR code instruction text */
+}
+
+@media (max-width: 768px) {
+    .right-pane {
+        position: static; /* or 'relative' */
+        width: 100%; /* Full width on small screens */
+        height: auto;
+        margin-top: 30px; /* Space from the top */
+    }
+
+    .left-pane {
+        width: 100%; /* Full width on small screens */
+        position: static; /* Adjust position if necessary */
+        height: auto; /* Adjust height if necessary */
+        /* You may also need to adjust background-size if the aspect ratio changes */
+    }
+
+    .avatar {
+        width: 120px; /* Smaller avatar on small screens */
+        height: 120px;
+        margin-bottom: 15px;
+    }
+
+    /* Adjust badge size and position for smaller screens if needed */
+    .badge {
+        width: 30px;
+        height: 30px;
+        border-radius: 15px;
+        transform: translate(50%, 50%);
+    }
+}
+

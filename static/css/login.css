@@ -118,7 +118,8 @@ html, body, .container {
 .form-container .form-group,
 .form-container p {
     text-align: center; /* Center align the text */
-    width: 100%; /* Full width to center the text for all screen sizes */
+    width: 100%;
+     /* Full width to center the text for all screen sizes */
 }
 
 
@@ -134,6 +135,7 @@ html, body, .container {
     background: #FFFFFF;
     border: 1px solid #9095A0;
     outline: none;
+    
 }
 
 

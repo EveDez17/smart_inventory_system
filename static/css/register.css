@@ -1,141 +1,139 @@
 
 /* register.css */
+
+
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--primary-color); /* Neutral background color */
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
 .register-page {
-    position: absolute;
-    top: 14px;
-    left: 12px;
-    width: 1418px;
-    height: 874px;
-    border-radius: 0px;
+    width: 100%;
+    max-width: 600px;
+    margin: 3rem auto;
+    padding: 1rem;
 }
 
 .register-container {
-    width: 100%;
-    max-width: 450px; /* Adjust this to match the design width */
-    background-color: #fff; /* Your preferred background for the container */
-    padding: 2em;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Simple shadow for depth */
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-h2 {
+h2.text-center {
     text-align: center;
-    margin-bottom: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
 }
 
-.form-group {
-    margin-bottom: 15px; /* Space between form fields */
+.form-row {
+    display: flex;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+}
+
+.form-field {
+    flex-basis: 100%;
+    margin-bottom: 0.5rem;
+    padding: 0 1rem; /* This adds padding on both sides */
+    box-sizing: border-box; /* Ensures padding is included in the width */
+    width: 100%;
+}
+
+.form-field label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: .5rem;
+    color: var(--primary-color);
 }
 
 .form-control {
-    width: 100%;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+    width: calc(100% - 2rem); /* Subtracting padding from the total width */
+    margin: 0 auto; /* Centering the input field within the form-field container */
+    box-sizing: border-box;
+    padding: 0.75rem 1rem;
+    font-size: 16px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    margin-bottom: 1rem; /* Added margin-bottom to all inputs */
 }
-.form-control::placeholder {
-    color: #6c757d;
+
+.form-control:focus {
+    border-color: #66afe9;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
 }
 
 .btn-primary {
+    display: block; /* Make the button block to fill container */
     width: 100%;
-    padding: 10px 20px;
-    background-color: var(--button-color); /* Same here for --button-color */
+    padding: 5px;
+    font-size: 18px; /* Increase font-size for better readability */
+    color: #fff;
+    background-color: var(--button-color); /* Default Bootstrap primary color */
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
+    margin-top: 2px;
+    margin-bottom: 2px; /* Add margin-top to separate from form fields */
 }
+
 .btn-primary:hover {
-    background-color: #0069d9;
-    border-color: #0062cc;
+    background-color: #0056b3; /* Darker shade for hover state */
 }
+
+.checkbox-group {
+    display: flex;
+    margin-bottom: 2px;
+    justify-content: center; /* Center checkbox horizontally */
+    align-items: center; /* Align text and checkbox vertically */
+}
+
+
 
 .text-center {
     text-align: center;
 }
 
-a {
-    color: #007bff;
-}
-
-a:hover {
-    color: #0056b3;
-    text-decoration: none;
-}
-.agreement {
-    display: flex;
-    align-items: center;
-    margin-top: 20px; /* Adjust based on your design */
-    margin-bottom: 20px; /* Adjust based on your design */
-}
-
-.agreement input[type="checkbox"] {
-    margin-right: 5px;
-}
-.agreement label {
-    margin: 0;
-}
-
-.login-link {
+.text-center.login-link {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 0.5rem; 
+    margin-bottom: 0;
+    margin-top: 0;
+    padding-top: 2px;
+}
+.checkbox-group label {
+    margin-left: 0.5rem; /* Spacing between checkbox and label text */
 }
 
-.login-link a {
-    color: #007bff;
-}
-
-.login-link a:hover {
-    text-decoration: underline;
-}
-.action-items {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.text-center {
-    text-align: center;
-}
-
-.text-center a {
-    display: inline-block;
-    margin-top: 20px;
-    color: var(--link-color); /* Define your --link-color */
+.text-center.login-link a {
+    color:var(--primary-color);
     text-decoration: none;
 }
 
-.text-center a:hover {
+.text-center.login-link a:hover {
     text-decoration: underline;
 }
-.form-control, .form-control select, .form-control textarea {
-    width: 100%; /* Ensures that the element fills the width of its parent */
-    padding: 10px; /* Same padding for all input types */
-    border-radius: 5px; /* Consistent border radius */
-    border: 1px solid #ccc; /* Consistent border width and color */
-    box-sizing: border-box; /* The width and height properties (and min/max properties) includes content, padding and border, but not the margin */
-}
-@media screen and (orientation: landscape) {
-    .register-container {
-        max-width: 600px; /* Increased width for landscape */
-        padding: 1em; /* Reduced padding */
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+    .checkbox-group {
+        flex-direction: column;
     }
 
-    .form-group {
-        margin-bottom: 10px; /* Reduced space between form fields */
-    }
-
-    .form-control, .form-control select, .form-control textarea {
-        padding: 8px; /* Reduced padding within form elements */
-        font-size: 14px; /* Reduced font size if necessary */
-    }
-
-    .btn-primary {
-        padding: 8px 20px; /* Adjust button padding if needed */
-    }
-
-    /* Additional styles to optimize the layout */
-    .agreement label {
-        font-size: 0.9em; /* Slightly smaller font for the agreement label */
+    .checkbox-group label {
+        margin-left: 0; /* Remove left margin on smaller screens */
+        margin-top: 0.5rem; /* Add space above the label text */
     }
 }
+    .form-row {
+        flex-direction: column;
+    }
+
+    .form-field {
+        flex-basis: 100%;
+    }
+

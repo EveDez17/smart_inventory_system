@@ -1,40 +1,112 @@
 {% extends 'base.html' %}
 
 {% load static %}
-
-{% block extrahead %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign up</title>
-    <link rel="stylesheet" href="{% static 'css/register.css' %}">
     
-</head>
+{% block title %}Register | Smart Inventory System{% endblock title %}
+{% block extrahead %}   
+{% block extra_styles %}
+   <link rel="stylesheet" href="{% static 'css/register.css' %}">
+{% endblock extra_styles %}
 {% endblock %}
-
 {% block content %}
-<body>
 <div class="register-page">
     <div class="register-container">
         <h2 class="text-center">Register</h2>
         <form method="post" novalidate>
             {% csrf_token %}
-            {{form.as_p }}
-            <div class="form-group agreement">
-                <input type="checkbox" id="terms" name="terms" required>
-                <label for="terms">By signing up, I agree with the Terms of Use & Privacy Policy</label>
+            
+            <input type="hidden" name="csrfmiddlewaretoken" value="your_csrf_token_here">
+            
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="id_employee_first_name">Employee first name:</label>
+                    <input type="text" name="employee_first_name" class="form-control" maxlength="100" required id="id_employee_first_name">
+                </div>
+                <div class="form-field">
+                    <label for="id_employee_last_name">Employee last name:</label>
+                    <input type="text" name="employee_last_name" class="form-control" maxlength="100" required id="id_employee_last_name">
+                </div>
             </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Submit</button>
+        
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="id_employee_street_number">Employee street number:</label>
+                    <input type="text" name="employee_street_number" class="form-control" maxlength="128" required id="id_employee_street_number">
+                </div>
+                <div class="form-field">
+                    <label for="id_employee_street_name">Employee street name:</label>
+                    <input type="text" name="employee_street_name" class="form-control" maxlength="255" required id="id_employee_street_name">
+                </div>
             </div>
-            <div class="text-center login-link">
-                Already have an account? <a href="{% url 'users:login' %}">Log in</a>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="id_employee_city">Employee city:</label>
+                    <input type="text" name="employee_city" class="form-control" maxlength="255" required id="id_employee_city">
+                </div>
+                <div class="form-field">
+                    <label for="id_employee_county">Employee county:</label>
+                    <input type="text" name="employee_county" class="form-control" maxlength="255" required id="id_employee_county">
+                </div>
+            </div>
+        
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="id_employee_country">Employee country:</label>
+                    <input type="text" name="employee_country" class="form-control" maxlength="255" required id="id_employee_country">
+                </div>
+                <div class="form-field">
+                    <label for="id_employee_post_code">Employee post code:</label>
+                    <input type="text" name="employee_post_code" class="form-control" maxlength="20" required id="id_employee_post_code">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="id_date_hired">Date hired:</label>
+                    <input type="date" name="date_hired" value="2024-04-20" class="form-control" required id="id_date_hired">
+                </div>
+                    <div class="form-field">
+                        <label for="id_role">Role:</label>
+                        <select name="role" class="form-control" id="id_role">
+                            <option value="" selected>---------</option>
+                            <option value="1">Warehouse Common</option>
+                            <option value="2">Gatehouse</option>
+                            <option value="3">Receptionist</option>
+                            <option value="4">Warehouse Operative</option>
+                            <option value="5">Warehouse Admin</option>
+                            <option value="6">Warehouse Team Leader</option>
+                            <option value="7">Warehouse Manager</option>
+                            <option value="8">Inventory Admin</option>
+                            <option value="9">Inventory Team Leader</option>
+                            <option value="10">Inventory Manager</option>
+                            <option value="11">Operational Manager</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="id_email">Email:</label>
+                        <input type="email" name="email" class="form-control" maxlength="320" required id="id_email">
+                    </div>
+                </div>
+                 <!-- Terms and Conditions Checkbox -->
+            <div class="form-row text-center">
+                <div class="form-field checkbox-group">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms">By signing up, I agree with the Terms of Use & Privacy Policy</label>
+                </div>
+            </div>
+            <!-- Submit Button Row -->
+            <div class="form-row">
+                <div class="form-field">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div> 
+             <!-- Login Link -->
+             <div class="form-row text-center login-link">
+                Already have an account? <a href="{% url 'users:login' %}">Please Login</a>
             </div>
         </form>
     </div>
 </div>
-</body>
-</html>
+
 {% endblock %}

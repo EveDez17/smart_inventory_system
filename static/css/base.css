@@ -7,6 +7,7 @@
     --button-hover-color: #4cae4c; /* Dark green */
     --error-color: #D8000C; /* Red */
     --error-background: #FFD2D2; /* Light red */
+    
 }
 
 footer {
@@ -15,7 +16,7 @@ footer {
     position: fixed;
     right: 0;
     bottom: 0;
-    padding: 10px;
+    padding: 0.5px;
     width: 100%;
     text-align: right;
 }

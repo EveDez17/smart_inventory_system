@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import login, update_session_auth_hash
 import qrcode
+from django.contrib import messages
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -49,7 +50,7 @@ def login_view(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
-                return redirect(reverse('demo:dashboard'))  # Ensure 'demo:dashboard' is correctly defined in urls.py
+                return redirect(reverse('users:dashboard'))  # Ensure 'demo:dashboard' is correctly defined in urls.py
             else:
                 return render(request, 'login.html', {'error': 'Your account is disabled.'})
         else:
@@ -90,7 +91,7 @@ def login_with_qr(request, login_token):
         # Log the user in
         login(request, user)
         # Redirect to the dashboard
-        return redirect(reverse('demo:dashboard'))  # Replace 'dashboard' with the name of your dashboard URL pattern
+        return redirect(reverse('users:dashboard'))  # Replace 'dashboard' with the name of your dashboard URL pattern
     else:
         # Handle invalid login token (e.g., show an error page)
         return redirect('invalid_login')  
@@ -155,31 +156,46 @@ def register(request):
     else:
         form = EmployeeRegistrationForm()
     return render(request, 'registration/register.html', {'form': form})
+
 @login_required
 @permission_required('users.can_approve_employee', raise_exception=True)
 def approve_user(request, employee_id):
     employee = get_object_or_404(Employee, id=employee_id)
-    if not employee.user:  # Ensure no User is linked yet
+    
+    if employee.user:
+        messages.error(request, 'This employee already has a linked user account.')
+        return render(request, 'registration/registration_error.html', {'message': 'This employee already has a linked user account.'})
+    
+    try:
+        # Create a user for the employee if it does not exist
+        username = employee.email.split('@')[0] if employee.email else None
+        if not username:
+            messages.error(request, 'Invalid email address.')
+            return render(request, 'registration/registration_error.html', {'message': 'Invalid email address provided.'})
+        
         user = User.objects.create_user(
-            username=employee.email.split('@')[0],  # Assuming username is derived from email
+            username=username,
             email=employee.email,
             password=User.objects.make_random_password()
         )
         employee.user = user
         employee.user.is_approved = True
-        employee.user.is_active = True  # Optionally activate the user immediately
+        employee.user.is_active = True
         employee.user.save()
         employee.save()
+
         send_mail(
             'Your Account Has Been Approved',
-            'Here are your login credentials. Username: {} \nPlease reset your password upon first login.'.format(user.username),
+            f'Here are your login credentials. Username: {user.username} Please reset your password upon first login.',
             'from@example.com',
             [user.email],
             fail_silently=False,
         )
-        return redirect('user_list')
-    else:
-        return render(request, 'registration/registration_error.html', {'message': 'This employee already has a linked user account.'})
+        messages.success(request, f'Employee {user.username} has been successfully approved and notified.')
+        return redirect('users:user_list')
+    except Exception as e:
+        messages.error(request, f'An error occurred: {str(e)}')
+        return render(request, 'registration/registration_error.html', {'message': str(e)})
 
 def user_password_reset(request):
     if request.method == 'POST':
@@ -198,7 +214,8 @@ def user_password_reset(request):
 @permission_required('users.can_view_pending', raise_exception=True)
 def pending_approval(request):
     employees_pending = Employee.objects.filter(user__is_approved=False)
-    return render(request, 'users/pending_approval.html', {'employees': employees_pending})
+    return render(request, 'registration/pending_approval.html', {'employees': employees_pending})
+
 
 
 

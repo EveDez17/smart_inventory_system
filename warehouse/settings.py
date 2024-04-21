@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'warehouse.inbound',
     'warehouse.inventory.apps.InventoryConfig',
     'warehouse.users.apps.UsersConfig',
     'crispy_forms',

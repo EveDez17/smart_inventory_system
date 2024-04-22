@@ -197,7 +197,7 @@ class PNDLocation(Location):
         verbose_name=_("Restrictions"),
         help_text=_("Any specific restrictions for this location, such as 'No flammable products'.")
     )
-    history = HistoricalRecords()
+   
 
     def __str__(self):
         return super().__str__() + " - PND"

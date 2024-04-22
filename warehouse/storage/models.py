@@ -213,7 +213,8 @@ class PickFace(Location):
     current_stock = models.PositiveIntegerField(default=0, verbose_name=_("Current Stock"))
     low_stock_threshold = models.PositiveIntegerField(default=10, verbose_name=_("Low Stock Threshold"))
     target_stock_level = models.PositiveIntegerField(default=100, verbose_name=_("Target Stock Level"))
-    history = HistoricalRecords()
+    
+    
 
     def __str__(self):
         return f"{self.pick_face_code} - {super().__str__()} - {self.category.name}"

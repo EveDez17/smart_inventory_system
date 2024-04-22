@@ -27,3 +27,20 @@ def create_putaway_task(sender, instance, created, **kwargs):
     logger.debug(f"Signal triggered for Inbound ID: {instance.pk}, Status: {instance.status}")
     if instance.status == 'Received':
         PutawayTask.objects.create(inbound=instance)
+        
+@receiver(post_save, sender='storage.Location')
+def location_update_handler(sender, instance, created, **kwargs):
+    if not created and 'status' in kwargs.get('update_fields', []):
+        if instance.status in ['urgent_pick', 'urgent_replenish']:
+            'outbound.send_urgent_notification'(instance)
+        elif instance.status == 'vor':
+            'outbound.send_verification_required_notification'(instance)
+
+#@receiver(post_migrate)
+#def create_initial_replenishment_task(sender, **kwargs):
+#    product = FoodProduct.objects.first()
+#    if product:
+#        ReplenishmentTask.objects.create(product=product, quantity=100)
+#    else:
+ #       print("No products available to create an initial replenishment task.")
+

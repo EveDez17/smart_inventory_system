@@ -1,7 +1,6 @@
 from django.utils import timezone
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from warehouse.inventory.models import FoodProduct, PNDLocation, PickFace, Supplier
 from django.contrib.auth import get_user_model
 from simple_history.models import HistoricalRecords
 
@@ -67,7 +66,7 @@ class FinalBayAssignment(models.Model):
 
 class Inbound(models.Model):
     final_bay_assignment = models.OneToOneField(FinalBayAssignment, on_delete=models.CASCADE, related_name='inbounds')
-    product = models.ForeignKey(FoodProduct, on_delete=models.CASCADE, related_name='inbounds')
+    product = models.ForeignKey('inventory.FoodProduct', on_delete=models.CASCADE, related_name='inbounds')
     quantity = models.PositiveIntegerField(verbose_name=_("quantity received"))
     receiving_date = models.DateTimeField(default=timezone.now, verbose_name=_("receiving date"))
     received_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name=_("received by"), related_name='inbound_receivings')
@@ -107,7 +106,7 @@ class Inbound(models.Model):
     
 class Receiving(models.Model):
     product = models.ForeignKey(
-        FoodProduct,
+        'inventory.FoodProduct',
         on_delete=models.CASCADE,
         related_name='receivings',  # This establishes the one-to-many relationship
         verbose_name=_("received product"),
@@ -123,7 +122,7 @@ class Receiving(models.Model):
         help_text=_("Date when product was received")
     )
     supplier = models.ForeignKey(
-        Supplier,
+        'inventory.Supplier',
         on_delete=models.CASCADE,
         related_name='receivings',  # Each supplier can have multiple receivings, but this line primarily impacts the product-receiving relationship
         verbose_name=_("supplier"),
@@ -156,8 +155,8 @@ class Receiving(models.Model):
 class PutawayTask(models.Model):
     inbound = models.ForeignKey(Inbound, on_delete=models.CASCADE, related_name='putaway_tasks')
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='putaway_tasks', verbose_name=_("Assigned FLT Driver"))
-    pnd_location = models.ForeignKey(PNDLocation, on_delete=models.SET_NULL, null=True, verbose_name=_("PND Location"), help_text=_("Final destination in the PND location"))
-    pick_face = models.ForeignKey(PickFace, on_delete=models.SET_NULL, null=True, verbose_name=_("Pick Face"), help_text=_("Designated pick face for replenishment"))
+    pnd_location = models.ForeignKey('storage.PNDLocation', on_delete=models.SET_NULL, null=True, verbose_name=_("PND Location"), help_text=_("Final destination in the PND location"))
+    pick_face = models.ForeignKey('storage.PickFace', on_delete=models.SET_NULL, null=True, verbose_name=_("Pick Face"), help_text=_("Designated pick face for replenishment"))
     status = models.CharField(max_length=20, choices=[('Assigned', _('Assigned')), ('In Progress', _('In Progress')), ('Completed', _('Completed'))], default='Assigned', verbose_name=_("Status"))
     start_time = models.DateTimeField(auto_now_add=True, verbose_name=_("Start Time"))
     completion_time = models.DateTimeField(null=True, blank=True, verbose_name=_("Completion Time"))
@@ -166,3 +165,68 @@ class PutawayTask(models.Model):
     def __str__(self):
         return f"Putaway Task for {self.inbound.product.name}, PND: {self.pnd_location}, assigned to {self.assigned_to}, status: {self.status}"
 
+# FLT TASKS MODEL
+
+class FLTTask(models.Model):
+    TASK_TYPES = [
+        ('Putaway', 'Putaway from Inbound to PND'),
+        ('Order Completion', 'Full Pallets Order Completion to Outbound'),
+        ('Replenishment', 'Replenishment to Pick Faces'),
+    ]
+    task_type = models.CharField(max_length=30, choices=TASK_TYPES, default='Putaway', help_text=_("Type of FLT task."))
+    source_location = models.ForeignKey('storage.Location', on_delete=models.CASCADE, related_name='flt_source_tasks')
+    destination_location = models.ForeignKey('storage.Location', on_delete=models.CASCADE, related_name='flt_destination_tasks')
+    product = models.ForeignKey('inventory.FoodProduct', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='flt_tasks', verbose_name=_("Assigned FLT Driver"))
+    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('In Progress', 'In Progress'), ('Completed', 'Completed')], default='Pending')
+    start_time = models.DateTimeField(default=timezone.now)
+    completion_time = models.DateTimeField(null=True, blank=True)
+    history = HistoricalRecords()
+
+    vna_task = models.ForeignKey(
+        'outbound.VNATask', 
+        on_delete=models.SET_NULL,  # Consider SET_NULL for non-mandatory relationships
+        related_name='flt_tasks_vna',
+        verbose_name=_("Related VNATask"),
+        null=True, 
+        blank=True
+    )
+
+    replenishment_task = models.ForeignKey(
+        'outbound.ReplenishmentTask', 
+        on_delete=models.SET_NULL,  # Similarly consider SET_NULL here
+        related_name='flt_tasks_replenishment',
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return f"{self.get_task_type_display()} Task for {self.product.name}, From {self.source_location} to {self.destination_location} [{self.status}]"
+
+    def perform_task(self):
+        if self.status == 'Pending':
+            self.status = 'In Progress'
+            self.save()
+
+            self.status = 'Completed'
+            self.completion_time = timezone.now()
+            self.save()
+
+            self.update_stock_levels()
+            return f"Task {self.id} completed."
+        return f"Task {self.id} is already in progress or completed."
+
+    def update_stock_levels(self):
+        if self.source_location.stock_levels.filter(product=self.product).exists():
+            source_stock = self.source_location.stock_levels.get(product=self.product)
+            source_stock.quantity -= self.quantity
+            source_stock.save()
+
+        if self.destination_location.stock_levels.filter(product=self.product).exists():
+            dest_stock = self.destination_location.stock_levels.get(product=self.product)
+            dest_stock.quantity += self.quantity
+            dest_stock.save()
+        else:
+            'inventory.StockLevel'.objects.create(product=self.product, location=self.destination_location, quantity=self.quantity)
+    

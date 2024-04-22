@@ -1,5 +1,9 @@
 from django.contrib.contenttypes.models import ContentType
-from warehouse.inventory.models import AuditLog, User, LLOPTask, FoodProduct
+from warehouse.inventory.models import AuditLog, FoodProduct
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
 
 def log_audit_action(instance, action, user, description):
     """
@@ -21,7 +25,7 @@ def log_llop_task_start(task_id, username, description):
     """
     Convenience function specifically for starting LLOPTasks.
     """
-    llop_task = LLOPTask.objects.get(id=task_id)
+    llop_task = 'outbound.LLOPTask'.objects.get(id=task_id)
     user = User.objects.get(username=username)
     log_audit_action(llop_task, 'Start', user, description)
 

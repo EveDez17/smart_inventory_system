@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'users/base.html' %}
 {% load static %}
 {% block title %}Dashboard | Smart Inventory System{% endblock title %}
 
@@ -35,10 +35,8 @@
       <nav class="sidebar-menu">
         <!-- Sidebar Menu Items -->
         <div class="sidebar-menu-item selected">
-            <a href="{% url 'dashboard' %}" class="icon-link">
                 <img src="{% static 'icons/home.png' %}" alt="Dashboard Icon" class="icon-placeholder">
                 <span>Dashboard</span>
-            </a>
             <div class="indicator"></div>
         </div>
         <div class="sidebar-menu-item selected">
@@ -77,10 +75,8 @@
             <div class="indicator"></div>
         </div>
         <div class="sidebar-menu-item selected">
-            <a href="logout.html">
                 <img src="{% static 'icons/logout.png' %}" alt="Logout Icon" class="icon-placeholder">
                 <span>Log Out</span>
-            </a>
             <div class="indicator"></div>
         </div>
     </nav>

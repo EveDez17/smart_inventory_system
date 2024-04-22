@@ -1,20 +1,32 @@
-
-$document.addEventListener('DOMContentLoaded', function () {
-    var notifButton = document.querySelector('.notifications-button');
+/* Notification AJAX*/
+document.addEventListener('DOMContentLoaded', function () {
+    var notifButton = document.createElement('button');
+    notifButton.textContent = '10 Daily notifications';
+    notifButton.classList.add('notifications-button');
+    notifButton.setAttribute('id', 'notificationsButton'); // Add id attribute
     var dropdown = document.querySelector('.notifications-dropdown');
 
-    notifButton.onclick = function () {
-        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-    };
+    notifButton.addEventListener('click', function (event) {
+        // Prevent the default form submission if the button is of type submit
+        event.preventDefault();
+        
+        // Toggle dropdown visibility
+        if (dropdown.style.display === 'block') {
+            dropdown.style.display = 'none';
+        } else {
+            dropdown.style.display = 'block';
+        }
+    });
+
+    // Append the button to its parent element
+    var notificationsContainer = document.querySelector('.notifications-container');
+    notificationsContainer.appendChild(notifButton);
 });
 
 
-/* Fetch Icons dynamically*/
 
-fetch('{% static "images/icins/machine-vision-svgrepo-com.svg" %}')
-    .then(response => response.text())
-    .then(data => {
-        document.querySelector('.icon-placeholder').innerHTML = data;
-    })
-    .catch(error => console.error('Error loading the SVG:', error));
+
+
+
+
 

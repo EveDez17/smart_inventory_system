@@ -15,8 +15,16 @@ class GatehouseBooking(models.Model):
     vehicle_registration = models.CharField(max_length=50)
     trailer_number = models.CharField(max_length=50, verbose_name=_("Trailer Number"))
     arrival_time = models.DateTimeField(default=timezone.now)
-    paperwork = models.FileField(upload_to='gatehouse_paperwork/')
+    has_paperwork = models.BooleanField(default=False)
+    paperwork_description = models.CharField(max_length=255, blank=True)
     history = HistoricalRecords()
+
+    def save(self, *args, **kwargs):
+        # If has_paperwork is False, clear the paperwork_description field
+        if not self.has_paperwork:
+            self.paperwork_description = ""
+        super(GatehouseBooking, self).save(*args, **kwargs)
+    
 
     def __str__(self):
         return f"{self.driver_name} from {self.company} with trailer {self.trailer_number} arrived at {self.arrival_time.strftime('%Y-%m-%d %H:%M')}"

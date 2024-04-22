@@ -1,0 +1,80 @@
+
+/* Gatehouse container bookin*/
+.my-custom-form-class {
+    max-width: 500px; /* Example max width */
+    margin: auto; /* Centers the form */
+}
+
+/*Gatehouse list form*/
+.center-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+    width: 100%; /* Ensure it takes the full width */
+}
+
+.form-style,
+.table-style {
+    width: 100%; /* Take the full width of their container */
+    max-width: none; /* Remove the max-width if you want to use the full page width */
+    margin-bottom: 2rem;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 0.5rem;
+    background-color: white;
+}
+
+/* Adjust the table styles */
+.table-style {
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.table-style th,
+.table-style td {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    text-align: left; /* Align to left or center as per design */
+}
+
+.table-style th {
+    background-color: #f7f7f7;
+}
+
+.table-style tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.scrollable-table {
+    max-height: 400px; /* Adjust the height as needed */
+    overflow-y: auto; /* Enables vertical scrolling if content overflows */
+    margin-top: 1rem; /* Space between the form and the table */
+}
+
+/* You might want to add media queries for responsiveness */
+@media (max-width: 768px) {
+    .form-style,
+    .table-style {
+        width: 95%;
+        margin: 1rem auto; /* Center in the viewport with a slight margin */
+        padding: 0.5rem; /* Adjust padding for smaller screens */
+    }
+}
+
+/* Provisional Bay  table*/
+
+.top-container {
+    display: flex;
+    flex-direction: column;
+    align-items: top;
+    justify-content: top;
+    min-height: 100vh;
+    padding: 1rem;
+    width: 100%; /* Ensure it takes the full width */
+}
+
+

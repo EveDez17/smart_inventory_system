@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import permission_required, login_required
 from django.shortcuts import redirect, render, get_object_or_404
 from warehouse.users.models import Employee, User
 from .forms import EmployeeRegistrationForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import login, update_session_auth_hash
 import qrcode
@@ -28,7 +28,7 @@ def csrf_failure(request, reason=""):
     return render(request, "errors/csrf_failure.html", context)
 #Base Page
 def home(request):
-    return render(request, "home.html")
+    return render(request, "users/home.html")
 
 #Login Page
 logger = logging.getLogger(__name__)
@@ -52,13 +52,13 @@ def login_view(request):
                 login(request, user)
                 return redirect(reverse('users:dashboard'))  # Ensure 'demo:dashboard' is correctly defined in urls.py
             else:
-                return render(request, 'login.html', {'error': 'Your account is disabled.'})
+                return render(request, 'users/login.html', {'error': 'Your account is disabled.'})
         else:
             # Return an error message to the login template
-            return render(request, 'login.html', {'error': 'Invalid email or password.'})
+            return render(request, 'users/login.html', {'error': 'Invalid email or password.'})
     else:
         # Display the login page if not a POST request
-        return render(request, 'login.html')
+        return render(request, 'users/login.html')
 #Cookie for Login    
 @require_POST
 @csrf_exempt  # Generally avoid using csrf_exempt; it's shown here for illustrative purposes
@@ -72,7 +72,7 @@ def ajax_login_view(request):
             if user.is_active:
                 login(request, user)
                 logger.info(f"User {username} logged in via AJAX.")
-                return JsonResponse({'success': True, 'redirect_url': reverse('demo:dashboard')})
+                return JsonResponse({'success': True, 'redirect_url': reverse('users:dashboard')})
             else:
                 logger.warning(f"Disabled account login attempt via AJAX: {username}")
                 return JsonResponse({'success': False, 'error': 'Your account is disabled.'})
@@ -216,12 +216,15 @@ def pending_approval(request):
     employees_pending = Employee.objects.filter(user__is_approved=False)
     return render(request, 'registration/pending_approval.html', {'employees': employees_pending})
 
-
+def custom_logout(request):
+    logout(request)
+    # Redirect to a success page.
+    return redirect('users/logout') 
 
 
 
 #Dashboard Page
 def dashboard(request):
     # You can fetch data or perform any other logic here before rendering the template
-    return render(request, 'dashboard.html')
+    return render(request, 'users/dashboard.html')
 

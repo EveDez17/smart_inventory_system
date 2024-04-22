@@ -1,0 +1,41 @@
+{% extends "users/base.html" %}
+{% load static %}
+{% block content %}
+{% block extrahead %}
+<link href="{% static 'css/gatehouse.css' %}" rel="stylesheet">
+{% endblock %}
+<div class="top-container">
+    <h2>Provisional Bay Assignments | Smart Inventory System</h2>
+
+    <!-- Search form -->
+    <form class="form-style" method="get">
+        <input type="date" name="date" value="{{ request.GET.date }}">
+        <input type="text" name="search" placeholder="Search">
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- List of provisional bay assignments -->
+    <table class="table-style">
+        <thead>
+            <tr>
+                <th>Provisional Bay</th>
+                <th>Assigned By</th>
+                <th>Assigned At</th>
+                <th>Gatehouse Booking</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for assignment in assignments %}
+                <tr>
+                    <td>{{ assignment.provisional_bay }}</td>
+                    <td>{{ assignment.assigned_by }}</td>
+                    <td>{{ assignment.assigned_at }}</td>
+                    <td>{{ assignment.gatehouse_booking }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+

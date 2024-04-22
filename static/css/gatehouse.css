@@ -51,8 +51,8 @@
 
 .scrollable-table {
     max-height: 400px; /* Adjust the height as needed */
-    overflow-y: auto; /* Enables vertical scrolling if content overflows */
-    margin-top: 1rem; /* Space between the form and the table */
+    overflow-x: auto; /* Enables vertical scrolling if content overflows */
+    overflow-y: auto; /* Space between the form and the table */
 }
 
 /* You might want to add media queries for responsiveness */

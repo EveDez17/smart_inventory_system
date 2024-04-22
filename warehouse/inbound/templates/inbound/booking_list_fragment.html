@@ -1,0 +1,30 @@
+<!-- booking_list_fragment.html -->
+<table class="table-style">
+    <thead>
+        <tr>
+            <th>Driver Name</th>
+            <th>Company</th>
+            <th>Vehicle Registration</th>
+            <th>Trailer Number</th>
+            <th>Arrival Time</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking in bookings %}
+        <tr>
+            <td>{{ booking.driver_name }}</td>
+            <td>{{ booking.company }}</td>
+            <td>{{ booking.vehicle_registration }}</td>
+            <td>{{ booking.trailer_number }}</td>
+            <td>{{ booking.arrival_time }}</td>
+            <td>
+                <!-- Example: Delete Button -->
+                <button class="btn btn-danger btn-sm delete-booking" data-id="{{ booking.id }}">Delete</button>
+                <!-- Example: Cancel Button -->
+                <button class="btn btn-warning btn-sm cancel-booking" data-id="{{ booking.id }}">Cancel</button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

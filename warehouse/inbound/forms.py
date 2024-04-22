@@ -1,6 +1,6 @@
 from django import forms
 from .models import GatehouseBooking
-
+# Gatehouse Bookin
 class GatehouseBookingForm(forms.ModelForm):
     class Meta:
         model = GatehouseBooking
@@ -14,8 +14,8 @@ class GatehouseBookingForm(forms.ModelForm):
         self.fields['arrival_time'].input_formats = ('%Y-%m-%dT%H:%M',)
         
         
-# inbound/forms.py
-from django import forms
+# Search
+
 
 class SearchForm(forms.Form):
     search_term = forms.CharField(max_length=100, required=False, label='Search')

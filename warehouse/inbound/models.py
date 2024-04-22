@@ -17,6 +17,7 @@ class GatehouseBooking(models.Model):
     arrival_time = models.DateTimeField(default=timezone.now)
     has_paperwork = models.BooleanField(default=False)
     paperwork_description = models.CharField(max_length=255, blank=True)
+    cancelled = models.BooleanField(default=False)
     history = HistoricalRecords()
 
     def save(self, *args, **kwargs):

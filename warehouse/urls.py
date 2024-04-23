@@ -25,7 +25,8 @@ urlpatterns = [
     path('', include('warehouse.users.urls')),
     path('inventory/', include('warehouse.inventory.urls')),
     path('', include('warehouse.inbound.urls')), 
-    path('', include('warehouse.outbound.urls')),    
+    path('', include('warehouse.outbound.urls')),
+     path('', include('warehouse.dashboard.urls')),    
     # Other global paths can be added here.
 ]
 

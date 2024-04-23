@@ -6,8 +6,8 @@ app_name = "users"
 
 urlpatterns = [
     path('', views.home, name="home"),
+    path('users_dashboard/', views.users_dashboard, name="users_dashboard"),
     path('login/', views.login_view, name='login'),
-    path('password_reset/', include('django.contrib.auth.urls')),
     path('logout/', views.custom_logout, name='logout'),
     path('register/', views.register, name='register'),
     path('pending_approval/', views.pending_approval, name='pending_approval'),
@@ -17,6 +17,6 @@ urlpatterns = [
     path('new-user/password-reset/done/', views.PasswordResetDoneView.as_view(), name='new_user_password_reset_done'),
     path('send_password_reset_email/', views.send_password_reset_email, name='send_password_reset_email'),
     path('generate-qr/', views.generate_qr, name='generate_qr'),
-    path('dashboard/', views.dashboard, name='dashboard'),
+    
     # Add other URL patterns for the demo app here
 ]

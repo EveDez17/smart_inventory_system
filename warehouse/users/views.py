@@ -1,6 +1,8 @@
+from django.dispatch import Signal
 from django.http import HttpResponse
 from django.contrib.auth.decorators import permission_required, login_required
 from django.shortcuts import redirect, render, get_object_or_404
+from warehouse import settings
 from warehouse.users.models import Employee, User
 from .forms import EmployeeRegistrationForm
 from django.contrib.auth import authenticate, login, logout
@@ -66,10 +68,10 @@ def login_view(request):
             return JsonResponse({'success': False, 'error': error_message}, status=400)
         else:
             # For non-AJAX request, render the login page with error message.
-            return render(request, 'registration/login.html', {'error': error_message})
+            return render(request, 'users/login.html', {'error': error_message})
 
     # If it's a GET request, render the login page.
-    return render(request, 'registration/login.html')
+    return render(request, 'users/login.html')
 
     
 #QRcode Login 
@@ -193,7 +195,7 @@ def user_password_reset(request):
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)  # Important to keep the user logged in
-            return redirect('password_reset_done')
+            return redirect('users:password_reset_done')
         else:
             return render(request, 'registration/password_reset.html', {'form': form})
     else:
@@ -218,6 +220,8 @@ def deny_user(request, user_id):
 
     messages.info(request, f"User {user.username} has been denied access.")
     return redirect('users:dashboard')
+# Define the signal
+approve_user_signal = Signal()
 
 # User credentials display after approve
 @login_required
@@ -228,8 +232,6 @@ def approve_user(request, user_id):
         # Approve the user (example logic)
         user.is_approved = True
         user.save()
-        # Signal that the user has been approved
-        approve_user.send(sender=User, user=user, request=request)
         # Generate a new password for the user
         new_password = get_random_string(length=10)  # Generate a random string of length 10
         user.set_password(new_password)
@@ -250,34 +252,37 @@ def approve_user(request, user_id):
     
 # ResetPasword for new User
 class CustomPasswordResetView(FormView):
-    template_name = 'registration/password_reset_form.html'
-    success_url = reverse_lazy('password_reset_done')
+    template_name = 'registration/newuser_password_reset.html'
+    success_url = reverse_lazy('users:new_user_password_reset_done')
     form_class = PasswordResetForm
 
     def form_valid(self, form):
         email = form.cleaned_data['email']
         user_model = get_user_model()
-        active_users = user_model._default_manager.filter(
-            email__iexact=email, is_active=True
-        )
+        active_users = user_model._default_manager.filter(email__iexact=email, is_active=True)
 
         for user in active_users:
             subject = "Password Reset Requested"
             email_template_name = "registration/password_reset_email.html"
             context = {
                 "email": user.email,
-                "domain": 'example.com',  # Replace with your domain
+                "domain": settings.SITE_DOMAIN,
                 "site_name": "Website",
                 "uid": urlsafe_base64_encode(force_bytes(user.pk)),
                 "user": user,
                 "token": default_token_generator.make_token(user),
-                "protocol": 'http',
+                "protocol": settings.EMAIL_PROTOCOL,
             }
-            email = render_to_string(email_template_name, context)
-            msg = EmailMultiAlternatives(subject, email, 'no-reply@example.com', [user.email])
-            msg.send()
+            email_body = render_to_string(email_template_name, context)
+            msg = EmailMultiAlternatives(subject, email_body, 'no-reply@yourdomain.com', [user.email])
+            try:
+                msg.send()
+            except Exception as e:
+                logger.error(f"Failed to send password reset email to {user.email}: {str(e)}")
+                # Consider adding user feedback here
 
         return super().form_valid(form)
+
     
 # Email sent with the link to login and change password   
 @require_POST  # Ensure that this view only accepts POST requests
@@ -295,7 +300,7 @@ def send_password_reset_email(request):
     return HttpResponse('Email sent successfully.')
 
 class PasswordResetDoneView(TemplateView):
-    template_name = 'registration/password_reset_done.html'
+    template_name = 'registration/newuser_password_done.html'
     
 
 def custom_logout(request):
@@ -306,7 +311,7 @@ def custom_logout(request):
 
 
 #Dashboard Page
-def dashboard(request):
+def users_dashboard(request):
     users_to_approve = User.objects.filter(is_approved=False)  # or any other condition
     return render(request, 'users/dashboard.html', {'users_to_approve': users_to_approve})
 

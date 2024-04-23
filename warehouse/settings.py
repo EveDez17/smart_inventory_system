@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'warehouse.inventory.apps.InventoryConfig',
     'warehouse.inbound',
     'warehouse.outbound',
+    'warehouse.dashboard',
     'crispy_forms',
     'crispy_bootstrap5',
     'simple_history',
@@ -163,14 +164,25 @@ CELERY_TIMEZONE = 'UTC'
 #Custom User
 AUTH_USER_MODEL = 'users.User'
 
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+
 #Custom Cookie
 CSRF_FAILURE_VIEW = 'warehouse.users.views.csrf_failure'
 
-# Email settings for sending mail
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.your-email-host.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@example.com'
-EMAIL_HOST_PASSWORD = 'your-email-password'
-DEFAULT_FROM_EMAIL = 'webmaster@example.com'
+# Development environment settings
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Emails will be printed to the console
+    SITE_DOMAIN = 'localhost'
+    EMAIL_PROTOCOL = 'http'
+else:
+    # Production environment settings
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.your-email-host.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = 'your-email@example.com'
+    EMAIL_HOST_PASSWORD = 'your-email-password'
+    DEFAULT_FROM_EMAIL = 'webmaster@example.com'
+    SITE_DOMAIN = 'yourdomain.com'
+    EMAIL_PROTOCOL = 'https'

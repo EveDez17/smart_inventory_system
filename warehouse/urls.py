@@ -16,22 +16,20 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
+from django.urls import path, re_path, include
+from django.views.generic import TemplateView
 
 urlpatterns = [
+    re_path(r'^api/', include('your_api.urls')),
     path('admin/', admin.site.urls),
     path('', include('warehouse.users.urls')),
     path('inventory/', include('warehouse.inventory.urls')),
     path('', include('warehouse.inbound.urls')), 
     path('', include('warehouse.outbound.urls')),
-     path('', include('warehouse.dashboard.urls')),    
-    # Other global paths can be added here.
+     path('dashboard/', include('warehouse.dashboard.urls')),    
+    re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='index'),
 ]
 
-# Only add this if you're in DEBUG mode to serve static files during development
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
 
 

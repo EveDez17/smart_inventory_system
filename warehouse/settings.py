@@ -21,12 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*x8uhiav##az69zd45nkznox!e9c_138(608l3lrohubjq7bdn'
+SECRET_KEY = 'Ah4U2yxrWLe8UcH7PSELEKkwvPIEyC6kL7WQX15wPri6p0E7aKJDfbH6YfntjmgyaEk'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.180']
+
+
 
 
 # Application definition
@@ -41,7 +43,7 @@ INSTALLED_APPS = [
     'warehouse.users.apps.UsersConfig',
     'warehouse.storage',
     'warehouse.inventory.apps.InventoryConfig',
-    'warehouse.inbound',
+    'warehouse.inbound.apps.InboundConfig',
     'warehouse.outbound',
     'warehouse.dashboard',
     'crispy_forms',
@@ -65,7 +67,7 @@ ROOT_URLCONF = 'warehouse.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'inbound', 'users', 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'inbound', 'users', 'templates', 'frontend/dist')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -139,6 +141,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'frontend/dist/static'),
     os.path.join(BASE_DIR, 'static'),
 ]
 
@@ -152,6 +155,13 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}
+
+
 
 # Celery Settings
 CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Using Redis as a broker
@@ -164,8 +174,8 @@ CELERY_TIMEZONE = 'UTC'
 #Custom User
 AUTH_USER_MODEL = 'users.User'
 
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/dashboard/'
+LOGIN_REDIRECT_URL = 'dashboard:dashboard'  # Adjust if namespace:path is different
+LOGOUT_REDIRECT_URL = 'users:login'  
 
 #Custom Cookie
 CSRF_FAILURE_VIEW = 'warehouse.users.views.csrf_failure'

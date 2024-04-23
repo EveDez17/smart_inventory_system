@@ -5,23 +5,74 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils import timezone
-from warehouse.inbound.models import GatehouseBooking, ProvisionalBayAssignment, HistoricalRecords
+from warehouse.inbound.models import GatehouseBooking, ProvisionalBayAssignment
 from simple_history.utils import update_change_reason
 from .forms import GatehouseBookingForm, SearchForm
+
+
+
+from rest_framework import viewsets
+from .models import FinalBayAssignment, GatehouseBooking
+from .serializers import FinalBayAssignmentSerializer, GatehouseBookingSerializer, ProvisionalBayAssignmentSerializer
+
+class GatehouseBookingViewSet(viewsets.ModelViewSet):
+    queryset = GatehouseBooking.objects.all()
+    serializer_class = GatehouseBookingSerializer
+    
+    # Optionally add search functionality
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_term = self.request.query_params.get('search')
+        if search_term:
+            queryset = queryset.filter(driver_name__icontains=search_term)
+        return queryset
+    
+class ProvisionalBayAssignmentViewSet(viewsets.ModelViewSet):
+    queryset = ProvisionalBayAssignment.objects.all()
+    serializer_class = ProvisionalBayAssignmentSerializer
+    
+    # Optionally add search functionality
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_term = self.request.query_params.get('search')
+        if search_term:
+            queryset = queryset.filter(driver_name__icontains=search_term)
+        return queryset
+    
+class FinalBayAssignmentViewSet(viewsets.ModelViewSet):
+    queryset = FinalBayAssignment.objects.all()
+    serializer_class = FinalBayAssignmentSerializer
+    
+    # Optionally add search functionality
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_term = self.request.query_params.get('search')
+        if search_term:
+            queryset = queryset.filter(driver_name__icontains=search_term)
+        return queryset
+
+
+
+
+
+
+
+
+
 
 def inbound_dashboard(request):
     return render(request, 'inbound/dashboard.html')
 
-# Gatehouse Register
+ #Gatehouse Register
 def book_gatehouse(request):
     if request.method == 'POST':
         form = GatehouseBookingForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+           form.save()
             # Add a success message to be displayed after the redirect
-            messages.success(request, 'Gatehouse entry registered successfully.')
-            # Redirect to the gatehouse bookings list
-            return redirect(reverse('inbound:gatehouse-bookings-list'))
+           messages.success(request, 'Gatehouse entry registered successfully.')
+           # Redirect to the gatehouse bookings list
+        return redirect(reverse('inbound:gatehouse-bookings-list'))
     else:
         form = GatehouseBookingForm()
 

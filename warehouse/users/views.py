@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 def csrf_failure(request, reason=""):
     context = {'reason': reason}
     return render(request, "errors/csrf_failure.html", context)
+
 #Base Page
 def home(request):
     return render(request, "users/home.html")
@@ -53,7 +54,7 @@ def login_view(request):
         if user is not None and user.is_active:
             login(request, user)
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                redirect_url = reverse('users:dashboard')  # Get the URL for the dashboard view
+                redirect_url = reverse('dashboard:dashboard')  # Get the URL for the dashboard view
                 # Return a JSON response
                 return JsonResponse({'success': True, 'redirect_url': redirect_url})
             else:
@@ -83,7 +84,7 @@ def login_with_qr(request, login_token):
         # Log the user in
         login(request, user)
         # Redirect to the dashboard
-        return redirect(reverse('users:dashboard'))  # Replace 'dashboard' with the name of your dashboard URL pattern
+        return redirect(reverse('dashboard:dashboard'))  # Replace 'dashboard' with the name of your dashboard URL pattern
     else:
         # Handle invalid login token (e.g., show an error page)
         return redirect('invalid_login')  
@@ -219,7 +220,7 @@ def deny_user(request, user_id):
     user.save()
 
     messages.info(request, f"User {user.username} has been denied access.")
-    return redirect('users:dashboard')
+    return redirect('dashboard:dashboard')
 # Define the signal
 approve_user_signal = Signal()
 
@@ -248,7 +249,7 @@ def approve_user(request, user_id):
     except User.DoesNotExist:
         # User with the given ID does not exist
         messages.error(request, "User not found.")
-        return redirect('users:dashboard')
+        return redirect('dashboard:dashboard')
     
 # ResetPasword for new User
 class CustomPasswordResetView(FormView):
@@ -313,5 +314,5 @@ def custom_logout(request):
 #Dashboard Page
 def users_dashboard(request):
     users_to_approve = User.objects.filter(is_approved=False)  # or any other condition
-    return render(request, 'users/dashboard.html', {'users_to_approve': users_to_approve})
+    return render(request, 'dashboard:dashboard', {'users_to_approve': users_to_approve})
 

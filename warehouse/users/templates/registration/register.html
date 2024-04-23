@@ -14,9 +14,6 @@
         <h2 class="text-center">Register</h2>
         <form method="post" novalidate>
             {% csrf_token %}
-            
-            <input type="hidden" name="csrfmiddlewaretoken" value="your_csrf_token_here">
-            
             <div class="form-row">
                 <div class="form-field">
                     <label for="id_employee_first_name">Employee first name:</label>

@@ -12,13 +12,13 @@
 
 .text {
     position: absolute;
-        top: 19px;
-        left: 260px;
-        font-family: Lexend;
-        font-size: 32px;
-        line-height: 48px;
-        font-weight: 700;
-        color: #171A1FFF;
+    top: 19px;
+    left: 260px;
+    font-family: Lexend;
+    font-size: 32px;
+    line-height: 48px;
+    font-weight: 700;
+    color: #171A1FFF;
 }
 
 /* Dashboard logo */
@@ -228,6 +228,11 @@
     background-color: var(--primary-color); /* Slightly darker background on hover */
 }
 
+.dashboard-container {
+    position: flex;
+    top: 19px;
+    left: 260px;
+}
 /* Media query for responsive adjustments */
 @media (max-width: 768px) {
     .sidebar-menu {

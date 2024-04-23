@@ -43,8 +43,6 @@ INSTALLED_APPS = [
     'warehouse.inventory.apps.InventoryConfig',
     'warehouse.inbound',
     'warehouse.outbound',
-    
-    
     'crispy_forms',
     'crispy_bootstrap5',
     'simple_history',

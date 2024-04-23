@@ -1,7 +1,7 @@
 {% extends 'users/base.html' %}
 
 {% block content %}
-<h2>Approve User</h2>
+<h2>Approve User |  Smart Inventory System</h2>
 <form method="post" action="{% url 'users:approve_user' user.id %}">
     {% csrf_token %}
     <p>Are you sure you want to approve {{ user.username }}?</p>

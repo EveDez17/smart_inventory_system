@@ -5,7 +5,15 @@
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'css/general_dashboard.css' %}">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
-
+<style>
+    /* Additional styles for table alignment */
+    .dashboard-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Align items horizontally */
+        justify-content: center; /* Align items vertically */
+    }
+</style>
 {% endblock extra_styles %}
 
 {% block content %}
@@ -82,10 +90,42 @@
     </nav>
 </div>
 <div class="dashboard-container"> <!-- Wrapper div, you might want to adjust its styling too -->
-    <h1 class="text"> DASHBOARD</h1>
+    <h1 class="text">DASHBOARD</h1>
     <!-- Add your dashboard content here -->
+    <div class="scroll-container">
+        <!-- Content that you want to scroll -->
+        <div class="approval-list">
+            <h2>Users to Approve</h2>
+            {% if users_to_approve %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users_to_approve %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <a href="{% url 'users:approve_user' user_id=user.id %}" class="btn btn-success">Approve</a>
+                            <a href="{% url 'users:deny_user' user_id=user.id %}" class="btn btn-danger">Deny</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No users to approve.</p>
+            {% endif %}
+        </div>
+        <!-- End of scrollable content -->
+    </div>
 </div>
-{% endblock %}
+{% endblock content %}
 {% block extra_scripts %}
     <script src="{% static 'js/dashboard_notifications.js' %}"></script>
     <script src="{% static 'js/dashboard_click_item.js' %}"></script>

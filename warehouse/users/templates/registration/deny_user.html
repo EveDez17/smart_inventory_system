@@ -1,0 +1,11 @@
+{% extends 'users/base.html' %}
+
+{% block content %}
+<h2>Deny User | Smart Inventory System</h2>
+<form method="post" action="{% url 'users:approve_user' user.id %}">
+    {% csrf_token %}
+    <p>Are you sure you want to deny{{ user.username }}?</p>
+    <button type="submit">Deny</button>
+    <a href="{% url 'users:user_list' %}">Cancel</a>
+</form>
+{% endblock %}

@@ -22,7 +22,7 @@ $(function() {
                 data: $(this).serialize(), // Serialize form data for submission
                 dataType: 'json', // Expect a JSON response from the server
                 success: function(response) {
-                    // Check the response for a success flag
+                    console.log('AJAX response:', response);
                     if (response.success) {
                         // If successful, redirect to the URL provided by the server
                         window.location.href = response.redirect_url;
@@ -32,9 +32,13 @@ $(function() {
                     }
                 },
                 error: function(xhr, status, error) {
-                    // In case of an error, display a generic error message
-                    $("#login-error").text("An error occurred: " + error).show();
+                    if (xhr.responseText.startsWith('<!DOCTYPE html>')) {
+                        console.error('HTML response received, possibly due to a server error.');
+                    } else {
+                        console.error("Error response:", xhr.responseText);
+                    }
                 }
+                
             });
         });
     });

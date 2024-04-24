@@ -8,16 +8,15 @@ from django.utils import timezone
 from warehouse.inbound.models import GatehouseBooking, ProvisionalBayAssignment
 from simple_history.utils import update_change_reason
 from .forms import GatehouseBookingForm, SearchForm
-
-
-
 from rest_framework import viewsets
 from .models import FinalBayAssignment, GatehouseBooking
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .serializers import FinalBayAssignmentSerializer, GatehouseBookingSerializer, ProvisionalBayAssignmentSerializer
 
 class GatehouseBookingViewSet(viewsets.ModelViewSet):
     queryset = GatehouseBooking.objects.all()
     serializer_class = GatehouseBookingSerializer
+    permission_classes = [IsAuthenticated]
     
     # Optionally add search functionality
     def get_queryset(self):

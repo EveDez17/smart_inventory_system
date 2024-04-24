@@ -24,9 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'Ah4U2yxrWLe8UcH7PSELEKkwvPIEyC6kL7WQX15wPri6p0E7aKJDfbH6YfntjmgyaEk'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.180']
+
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8080',  # Replace with the URL of your Vue.js development server
+    # Add other allowed origins if needed
+]
 
 
 
@@ -46,6 +52,8 @@ INSTALLED_APPS = [
     'warehouse.inbound.apps.InboundConfig',
     'warehouse.outbound',
     'warehouse.dashboard',
+    'warehouse.api',
+    'corsheaders',
     'crispy_forms',
     'crispy_bootstrap5',
     'simple_history',
@@ -60,6 +68,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'warehouse.urls'
@@ -67,7 +76,7 @@ ROOT_URLCONF = 'warehouse.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'inbound', 'users', 'templates', 'frontend/dist')],
+        'DIRS': [os.path.join(BASE_DIR, 'inbound', 'users', 'templates', 'frontend', 'dist')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

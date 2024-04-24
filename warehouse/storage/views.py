@@ -1,5 +1,5 @@
 from django.shortcuts import render
 
-def outbound_dashboard(request):
+def storage_dashboard(request):
     # Your code here
-    return render(request, 'storage/dashboard.html', {})
+    return render(request, 'storage_dashboard/dashboard.html', {})

@@ -20,13 +20,14 @@ from django.urls import path, re_path, include
 from django.views.generic import TemplateView
 
 urlpatterns = [
-    re_path(r'^api/', include('your_api.urls')),
+    re_path(r'^api/', include('warehouse.api.urls')),
     path('admin/', admin.site.urls),
     path('', include('warehouse.users.urls')),
     path('inventory/', include('warehouse.inventory.urls')),
     path('', include('warehouse.inbound.urls')), 
     path('', include('warehouse.outbound.urls')),
-     path('dashboard/', include('warehouse.dashboard.urls')),    
+    path('', include('warehouse.storage.urls')),
+    path('dashboard/', include('warehouse.dashboard.urls')),    
     re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='index'),
 ]
 

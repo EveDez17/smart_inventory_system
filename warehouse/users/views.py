@@ -37,8 +37,8 @@ def csrf_failure(request, reason=""):
     return render(request, "errors/csrf_failure.html", context)
 
 #Base Page
-def home(request):
-    return render(request, "users/home.html")
+class HomePageView(TemplateView):
+    template_name = 'index.html'
 
 #Login Page
 def login_view(request):
@@ -54,25 +54,30 @@ def login_view(request):
         if user is not None and user.is_active:
             login(request, user)
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                redirect_url = reverse('dashboard:dashboard')  # Get the URL for the dashboard view
-                # Return a JSON response
+                redirect_url = reverse('dashboard_global:dashboard')  
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(username=username, password=password)
+
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+        if user is not None and user.is_active:
+            login(request, user)
+            if is_ajax:
                 return JsonResponse({'success': True, 'redirect_url': redirect_url})
             else:
-                # Regular request: redirect to the dashboard
                 return redirect(redirect_url)
 
-        # Handle login failure.
         error_message = 'Invalid username or password.' if user is None else 'Your account is disabled.'
-        
-        # If login was unsuccessful and it's an AJAX request, return JSON response.
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if is_ajax:
             return JsonResponse({'success': False, 'error': error_message}, status=400)
         else:
-            # For non-AJAX request, render the login page with error message.
-            return render(request, 'users/login.html', {'error': error_message})
+            return render(request, 'login.html', {'error': error_message})
 
-    # If it's a GET request, render the login page.
-    return render(request, 'users/login.html')
+    return render(request, 'login.html')
 
     
 #QRcode Login 
@@ -84,7 +89,7 @@ def login_with_qr(request, login_token):
         # Log the user in
         login(request, user)
         # Redirect to the dashboard
-        return redirect(reverse('dashboard:dashboard'))  # Replace 'dashboard' with the name of your dashboard URL pattern
+        return redirect(reverse('dashboard'))  # Replace 'dashboard' with the name of your dashboard URL pattern
     else:
         # Handle invalid login token (e.g., show an error page)
         return redirect('invalid_login')  
@@ -309,7 +314,7 @@ def custom_logout(request):
     # Redirect to a success page.
     return redirect('users/logout') 
 
-
+ 
 
 #Dashboard Page
 def users_dashboard(request):

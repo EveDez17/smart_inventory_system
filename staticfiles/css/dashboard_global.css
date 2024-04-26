@@ -1,0 +1,136 @@
+/* Global Dashboard*/
+html, body {
+    height: 100%;
+    margin: 0;
+  }
+  
+  /* Flex container for the whole page */
+  .page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  /* Push the footer to the bottom */
+  .content-wrap {
+    flex: 1;
+  }
+  
+  /* Footer styling */
+  .footer {
+    background-color: #f5f5f5; /* Your background color */
+    padding: 20px 0; /* Padding for the footer */
+    text-align: center;
+  }
+  
+
+/* Primary sidebar styles */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center children vertically */
+    position: fixed; /* Sidebar doesn't move on scroll */
+    top: 0;
+    bottom: 0;
+    left: 0;
+    min-height: 100vh; /* Full height of the viewport */
+    z-index: 100;
+    padding-top: 48px; /* Adjust based on actual navbar height */
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if content is taller than viewport */
+}
+
+/* Adjust if .sidebar-nav is used as a class within your sidebar */
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+/* If you have .sidebar-sticky as a child of .sidebar, 
+it may not be necessary with the current setup. Adjust or remove accordingly. */
+.sidebar-sticky {
+    flex-grow: 1;
+}
+
+/* Style for the navigation column */
+.nav.flex-column {
+    width: 100%;
+}
+
+.nav-item .nav-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    margin-bottom: 15px;
+}
+
+.icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; /* Width of the icon container */
+    height: 24px; /* Height of the icon container */
+    margin-right: 2px; /* Space between the icon and the text */
+}
+
+.nav-link {
+    align-items: center;
+    display: block; /* This ensures the full area of the link is clickable */
+    padding: 10px 15px; /* Adjust padding to get the desired spacing, first value is top and bottom, second is left and right */
+    margin-bottom: 10px;
+}
+
+.nav-link img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.feather-icon i {
+    display: block;
+    width: 100%; /* Fill the container width */
+    height: 100%; /* Fill the container height */
+}
+
+/* Logo container styling */
+.sidebar-logo-container {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Logo styling */
+.sidebar-logo {
+    max-width: 100%; /* Ensures the logo is not wider than its container */
+    height: auto; /* Maintains the aspect ratio of the logo */
+    max-height: 60px; /* Ensures the logo is not taller than 60px */
+}
+
+
+/* User profile container styling - merged from .profile-section */
+.user-profile-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column; /* Stack the avatar and text vertically */
+    padding: 20px; /* Space inside the container */
+    border-bottom: 1px solid #dee2e6; /* Border below the avatar container */
+    margin-bottom: 20px; /* Space between avatar container and the next section */
+}
+
+/* Profile avatar styling */
+.profile-avatar {
+    border-radius: 50%; /* Make the avatar round */
+    width: 80px; /* Width of the avatar */
+    height: 80px; /* Height of the avatar */
+    object-fit: cover; /* Ensure the image covers the area without stretching */
+    margin-bottom: 8px; /* Space between avatar and profile text */
+}
+
+/* Profile name styling */
+.profile-name {
+    font-size: 16px; /* Size of the profile name text */
+    color: #333; /* Color of the profile name text */
+}

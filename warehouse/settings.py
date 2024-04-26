@@ -26,13 +26,7 @@ SECRET_KEY = 'Ah4U2yxrWLe8UcH7PSELEKkwvPIEyC6kL7WQX15wPri6p0E7aKJDfbH6YfntjmgyaE
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.180']
-
-# CORS settings
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8080',  # Replace with the URL of your Vue.js development server
-    # Add other allowed origins if needed
-]
+ALLOWED_HOSTS = []
 
 
 
@@ -51,9 +45,8 @@ INSTALLED_APPS = [
     'warehouse.inventory.apps.InventoryConfig',
     'warehouse.inbound.apps.InboundConfig',
     'warehouse.outbound',
-    'warehouse.dashboard',
-    'warehouse.api',
-    'corsheaders',
+    'warehouse.dashboard_global.apps.DashboardGlobalConfig',
+    'rest_framework',
     'crispy_forms',
     'crispy_bootstrap5',
     'simple_history',
@@ -68,7 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'warehouse.urls'
@@ -76,7 +69,7 @@ ROOT_URLCONF = 'warehouse.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'inbound', 'users', 'templates', 'frontend', 'dist')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -150,10 +143,18 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'frontend/dist/static'),
     os.path.join(BASE_DIR, 'static'),
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+}
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

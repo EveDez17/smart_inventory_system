@@ -35,12 +35,17 @@ class CustomUserChangeForm(UserChangeForm):
         }
 
 class EmployeeRegistrationForm(forms.ModelForm):
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))  # Assuming email is here for simplicity
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    photo = forms.ImageField(
+        required=False,  # Assuming the photo is optional
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    ) 
+    
 
     class Meta:
         model = Employee
         fields = ('employee_first_name', 'employee_last_name', 'employee_street_number', 'employee_street_name',
-                  'employee_city', 'employee_county', 'employee_country', 'employee_post_code', 'date_hired', 'role', 'email')
+                  'employee_city', 'employee_county', 'employee_country', 'employee_post_code', 'date_hired', 'role', 'email', 'photo')
         widgets = {
             'employee_first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'employee_last_name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -52,5 +57,7 @@ class EmployeeRegistrationForm(forms.ModelForm):
             'employee_post_code': forms.TextInput(attrs={'class': 'form-control'}),
             'date_hired': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'role': forms.Select(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),  # Managed here for simplicity
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'photo': forms.FileInput(attrs={'class': 'form-control'}),  
+            
         }

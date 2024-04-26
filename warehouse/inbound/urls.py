@@ -1,22 +1,26 @@
-from django.urls import include, path
+from django.urls import path
 from rest_framework.routers import DefaultRouter
-from . import views
+
+from .views import (
+    CombinedDataView,
+    GatehouseBookingListView,
+    GatehouseLogView,
+    InboundDashboardView
+)
 
 app_name = 'inbound'
 
 router = DefaultRouter()
-router.register(r'gatehouse-bookings', views.GatehouseBookingViewSet)
-router.register(r'provisional-bay-assigment', views.ProvisionalBayAssignmentViewSet)
-router.register(r'final-bay-assigment', views.FinalBayAssignmentViewSet)
+router.register(r'gatehouse-bookings', GatehouseBookingListView)
+
 
 urlpatterns = [
-    path('inbound_dashboard/', views.inbound_dashboard, name='inbound_dashboard'),
-    path('gatehouse_booking/', views.book_gatehouse, name='gatehouse_booking'),
-    path('gatehouse-bookings/', views.gatehouse_bookings_list, name='gatehouse-bookings-list'),
-    path('cancel-booking/<int:booking_id>/', views.cancel_booking, name='cancel_booking'),
-    path('booking-list-fragment/', views.booking_list_fragment, name='booking_list_fragment'),
-    path('delete-booking/<int:booking_id>/', views.delete_booking, name='delete_booking'),
-    path('provisional-bays/', views.provisional_bay_list, name='provisional-bay-list'),
     
-    path('api/', include(router.urls)),
+    path('dashboard/', InboundDashboardView.as_view(), name='inbound_dashboard'),
+    path('gatehouse-log/', GatehouseLogView.as_view(), name='gatehouse_log'),
+    path('api/combined-data/', CombinedDataView.as_view(), name='combined-data'),
+    path('gatehouse-bookings/', GatehouseBookingListView.as_view(), name='gatehouse-bookings-list'),
+    
 ]
+
+

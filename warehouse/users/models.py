@@ -67,6 +67,7 @@ class Employee(models.Model):
     employee_post_code = models.CharField(max_length=20, unique=True)
     date_hired = models.DateField(default=timezone.now) 
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True, related_name='employees')
+    photo = models.ImageField(upload_to='employee_photos/', blank=True, null=True)
     
     def __str__(self):
         return f"{self.employee_first_name} {self.employee_last_name}"

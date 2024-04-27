@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Final Bay Assignments | Smart Inventory System{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/dashboard_global.css' %}">
+<style>
+    .custom-container {
+        background-color: #f5f5f5; /* Light grey background */
+        border-radius: 0.25rem; /* Rounded corners */
+        margin-top: 2rem; /* Spacing from top */
+        padding: 2rem; /* Padding around the content */
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+    .custom-header {
+        background-color: #004085; /* Dark blue header */
+        color: white; /* Text color */
+        padding: 1rem; /* Padding inside the header */
+        margin: -2rem -2rem 2rem -2rem; /* Align the header edge to edge */
+        border-top-left-radius: 0.25rem; /* Rounded corners */
+        border-top-right-radius: 0.25rem; /* Rounded corners */
+    }
+    .custom-table {
+        margin-bottom: 0; /* Remove default bottom margin of the table */
+    }
+    .custom-table thead th {
+        background-color: #e9ecef; /* Light grey background for table header */
+    }
+    .custom-table tbody td {
+        background-color: #ffffff; /* White background for table body */
+    }
+    .alert-custom {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        border: none;
+        border-left: 5px solid #155724; /* Green border on the left for success */
+    }
+</style>
+{% endblock extra_styles %}
+
+{% block content %}
+<div class="container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success alert-custom" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="custom-container">
+        <div class="custom-header">
+            <h2 class="m-0">Final Bay Assignments</h2>
+        </div>
+        
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Create Final Bay Assignment</button>
+        </form>
+
+        <h3>Existing Assignments</h3>
+        <table class="table custom-table">
+            <thead>
+                <tr>
+                    <th>Provisional Bay Assignment</th>
+                    <th>Final Bay</th>
+                    <th>Confirmed by</th>
+                    <th>Confirmed at</th>
+                    <th>Loading Confirmed</th>
+                    <th>Loaded At</th>
+                    <th>Loader</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in final_bay_assignments %}
+                <tr>
+                    <td>{{ assignment.provisional_bay_assignment }}</td>
+                    <td>{{ assignment.final_bay }}</td>
+                    <td>{{ assignment.confirmed_by }}</td>
+                    <td>{{ assignment.confirmed_at }}</td>
+                    <td>{{ assignment.is_loaded|yesno:"Yes,No" }}</td>
+                    <td>{{ assignment.loaded_at }}</td>
+                    <td>{{ assignment.loader }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">No final bay assignments have been made.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

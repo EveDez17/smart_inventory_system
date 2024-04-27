@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-background d-flex flex-column justify-content-between">
+    <div class="container">
+        <h1 class="text-center">Gatehouse Booking Dashboard</h1>
+
+        <!-- Place to display messages -->
+        {% if messages %}
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                {% for message in messages %}
+                <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+            <div class="col-md-6 form-container custom-grey-bg">
+                <h2 class="text-center mb-4">Create Provisional Bay Assignment</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        {{ form.as_p }}
+                    </div>
+                    <button type="submit" class="btn btn-success btn-block">Assign Bay</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

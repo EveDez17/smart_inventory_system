@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Stock Level Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Bar Chart -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Stock Level Bar Chart</div>
+                <div class="card-body">
+                    <canvas id="stockChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pie Chart -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">Stock Level Pie Chart</div>
+                <div class="card-body">
+                    <canvas id="pieChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Upload PDF Card -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">Upload PDF</div>
+                <div class="card-body">
+                    <p>Generate pie counts from a PDF file.</p>
+                    <form method="post" enctype="multipart/form-data" action="{% url 'inventory:generate_pie_counts_from_pdf' %}">
+                        {% csrf_token %}
+                        <input type="file" name="pdf_file">
+                        <button type="submit" class="btn btn-primary">Generate Pie Counts</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Bar Chart
+    var ctx1 = document.getElementById('stockChart').getContext('2d');
+    var chartData1 = {{ chart_data1|safe }};
+    var myChart1 = new Chart(ctx1, {
+        type: 'bar',
+        data: chartData1,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Pie Chart
+    var ctx2 = document.getElementById('pieChart').getContext('2d');
+    var chartData2 = {{ chart_data2|safe }};
+    var myChart2 = new Chart(ctx2, {
+        type: 'pie',
+        data: chartData2,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+        }
+    });
+</script>
+{% endblock %}

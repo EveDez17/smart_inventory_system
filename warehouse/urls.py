@@ -21,9 +21,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    
     path('users/', include('warehouse.users.urls', namespace='users')),
     path('inventory/', include(('warehouse.inventory.urls', 'inventory'), namespace='inventory')),
-    path('inbound/', include(('warehouse.inbound.urls', 'inbound'), namespace='inbound')),
+    path('inbound/', include('warehouse.inbound.urls', namespace='inbound')),
     path('outbound/', include(('warehouse.outbound.urls', 'outbound'), namespace='outbound')),
     path('storage/', include(('warehouse.storage.urls', 'storage'), namespace='storage')),
     path('dashboard-global/', include('warehouse.dashboard_global.urls', namespace='dashboard_global')),

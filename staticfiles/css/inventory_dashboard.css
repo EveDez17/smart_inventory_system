@@ -1,0 +1,17 @@
+.table-header {
+    background-color: #007BFF; /* Dark blue background */
+    color: white; /* White text color */
+    text-align: center; /* Center the text */
+    font-size: 16px; /* Larger font size */
+}
+
+.header-icon {
+    font-size: 12px;
+    margin-left: 5px;
+    color: #ddd; /* Light gray color for icons */
+}
+
+.table-responsive {
+    max-height: 400px; /* Adjust the height as necessary */
+    overflow-y: auto; /* Enable vertical scrolling */
+}

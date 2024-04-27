@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add/Edit Supplier</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0-alpha1/css/bootstrap.min.css">
+    <style>
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: flex-end; /* Align content to the end (right side) */
+            align-items: center; /* Align items vertically */
+            padding: 10px; /* Adjust padding as needed */
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 id="supplierFormTitle">Add Supplier</h2>
+        <form id="supplierForm" method="post">
+            <!-- CSRF Token -->
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+            <!-- Supplier Name -->
+            <div class="mb-3">
+                <label for="supplierName" class="form-label">Supplier Name</label>
+                <input type="text" class="form-control" id="supplierName" name="name" required>
+            </div>
+
+            <!-- Supplier Contact -->
+            <div class="mb-3">
+                <label for="supplierContact" class="form-label">Contact</label>
+                <input type="text" class="form-control" id="supplierContact" name="contact" required>
+            </div>
+
+            <!-- Email Address -->
+            <div class="mb-3">
+                <label for="emailAddress" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="emailAddress" name="email" required>
+            </div>
+
+            <!-- Contact Number -->
+            <div class="mb-3">
+                <label for="contactNumber" class="form-label">Contact Number</label>
+                <input type="text" class="form-control" id="contactNumber" name="contact_number" required>
+            </div>
+
+            <!-- Address Fields -->
+            <div class="mb-3">
+                <label for="streetNumber" class="form-label">Street Number</label>
+                <input type="text" class="form-control" id="streetNumber" name="street_number" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="streetName" class="form-label">Street Name</label>
+                <input type="text" class="form-control" id="streetName" name="street_name" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" id="city" name="city" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="county" class="form-label">County</label>
+                <input type="text" class="form-control" id="county" name="county" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="country" class="form-label">Country</label>
+                <input type="text" class="form-control" id="country" name="country" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="postCode" class="form-label">Post Code</label>
+                <input type="text" class="form-control" id="postCode" name="post_code" required>
+            </div>
+
+            <!-- Additional fields as required by your Supplier model -->
+
+            <button type="submit" class="btn btn-primary">Save Supplier</button>
+        </form>
+    </div>
+        <footer class="text-muted py-4 bg-light mt-auto">
+            <div class="container">
+                <p class="float-right">
+                    <a href="#">Back to top</a>
+                </p>
+                <p>Copyright © {% now "Y" %} E-ITech</p>
+            </div>
+        </footer>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const supplierId = urlParams.get('supplier_id');
+
+        if (supplierId) {
+            // If editing an existing supplier, update form title and action
+            document.getElementById('supplierFormTitle').innerText = 'Edit Supplier';
+            document.getElementById('supplierForm').action = `/suppliers/${supplierId}/update/`;
+
+            // Fetch existing supplier data and populate form fields
+            fetch(`/suppliers/${supplierId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('supplierName').value = data.name;
+                    document.getElementById('supplierContact').value = data.contact;
+                    document.getElementById('emailAddress').value = data.email;
+                    document.getElementById('contactNumber').value = data.contact_number;
+                    document.getElementById('address').value = data.address;
+                })
+                .catch(error => console.error('Error loading supplier data:', error));
+        }
+    </script>
+</body>
+</html>
+
+

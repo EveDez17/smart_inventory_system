@@ -1,0 +1,139 @@
+{% extends 'inventory_base.html' %}
+{% load static %}
+
+{% block title %}
+Inventory Dashboard | Smart Inventory System
+{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/dashboard_global.css' %}">
+<link rel="stylesheet" href="{% static 'css/inventory_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Inventory Dashboard</h1>
+    <div class="container">
+        <!-- Search Form -->
+        <div class="row justify-content-center mt-3 mb-3">
+            <div class="col-md-6">
+                <form method="get" action="{% url 'inventory:inventory_search_results' %}" id="searchForm" class="input-group">
+                    <input type="text" class="form-control" placeholder="Search SKU" id="skuSearch" name="search_query" value="{{ request.GET.search_query|default_if_none:'' }}">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- End Search Form -->
+
+    <!-- Add New Product Card -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Add New Product</div>
+                <div class="card-body">
+                    <p>Create a new SKU entry.</p>
+                    <a href="{% url 'inventory:food_product_create' %}" class="btn btn-success">Add New</a>
+                </div>
+            </div>
+        </div>
+        
+          <!-- Edit Product Card with Dropdown Menu -->
+<div class="col-md-4">
+    <div class="card text-white bg-warning mb-3">
+        <div class="card-header">Edit Product</div>
+        <div class="card-body">
+            <p>Edit existing SKU.</p>
+            <form action="{% url 'inventory:food_product_edit_redirect' %}" method="post">
+                {% csrf_token %}
+                <select name="product_id" class="form-control" onchange="this.form.submit()">
+                    <option value="">Select a Product</option>
+                    {% for product in products %}
+                    <option value="{{ product.pk }}">{{ product.name }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="col-md-4">
+    <div class="card text-white bg-danger mb-3">
+        <div class="card-header">Delete Product</div>
+        <div class="card-body">
+            <p>Delete existing SKU.</p>
+            <form action="{% url 'inventory:food_product_delete_redirect' %}" method="post">
+                {% csrf_token %}
+                <select name="product_id" class="form-control" onchange="this.form.submit()">
+                    <option value="">Select a Product to Delete</option>
+                    {% for product in products %}
+                    <option value="{{ product.pk }}">{{ product.name }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Categories Card -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-header">View Categories</div>
+            <div class="card-body">
+                <p>View a list of all product categories.</p>
+                <a href="{% url 'inventory:category_list' %}" class="btn btn-info">View Categories</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Audit Logs Card -->
+<div class="col-md-4">
+    <div class="card text-white bg-info mb-3">
+        <div class="card-header">View Audit Logs</div>
+        <div class="card-body">
+            <p>View a list of all audit logs.</p>
+            <a href="{% url 'inventory:audit_log_list' %}" class="btn btn-info">View Audit Logs</a>
+        </div>
+    </div>
+</div>
+
+    <div class="table-responsive"> 
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th class="table-header" onclick="sortTable(0);">SKU</th>
+                    <th class="table-header">Name</th>
+                    <th class="table-header">Description</th>
+                    <th class="table-header">Quantity <span class="header-icon">&#x1F4C8;</span></th> 
+                    <th class="table-header">Unit Price <span class="header-icon">&#x1F4B2;</span></th>
+                    <th class="table-header">Batch Number</th>
+                    <th class="table-header">Expiration Date</th>
+                    <th class="table-header">Storage Temperature</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.sku }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.description }}</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>{{ product.unit_price }}</td>
+                    <td>{{ product.batch_number }}</td>
+                    <td>{{ product.expiration_date }}</td>
+                    <td>{{ product.storage_temperature }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8">No products found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+</div>
+{% endblock %}
+
+
+

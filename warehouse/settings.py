@@ -161,8 +161,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Define allowed template packs for crispy forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
+# Set the default template pack for crispy forms
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 REST_FRAMEWORK = {

@@ -96,7 +96,7 @@ class Address(models.Model):
         unique_together = (('street_number', 'post_code'),)
 
     def __str__(self):
-        # Corrected the return statement
+    
         return f"{self.street_number} {self.street_name}, {self.city}, {self.county}, {self.country}, {self.post_code}"
     
 class Supplier(models.Model):

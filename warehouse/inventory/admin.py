@@ -1,7 +1,8 @@
 
 from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
-from .models import Address, AuditLog, Category, FoodProduct, StockLevel, Supplier
+from .models import Address, AuditLog, Category, FoodProduct, PredictionModel, Report, StockLevel, Supplier
+from .models import Transaction
 
 class CategoryAdmin(MPTTModelAdmin):
     list_display = ['name', 'slug', 'is_active', 'parent']
@@ -40,8 +41,47 @@ class StockLevelAdmin(admin.ModelAdmin):
     list_filter = ('location', 'product', 'expiration_date')
     search_fields = ('product__name', 'location__name', 'batch_number')
     
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = ('transaction_type', 'status', 'amount', 'created_at', 'updated_at')
+    list_filter = ('transaction_type', 'status', 'created_at')
+    search_fields = ('description', 'amount')
+    date_hierarchy = 'created_at'
+    readonly_fields = ('created_at', 'updated_at')
+
+    fieldsets = (
+        (None, {
+            'fields': ('transaction_type', 'status', 'amount', 'description')
+        }),
+        ('Related Entities', {
+            'fields': ('order', 'customer', 'supplier'),
+            'classes': ('collapse',),
+        }),
+        ('Audit Information', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
     
+@admin.register(Report)
+class ReportAdmin(admin.ModelAdmin):
+    list_display = ('name', 'report_type', 'created_at', 'updated_at')
+    search_fields = ('name', 'report_type')
+    list_filter = ('report_type', 'created_at')
+    readonly_fields = ('created_at', 'updated_at')
+
+    def has_add_permission(self, request):
+        return False  # Prevents adding new reports via the admin interface
+
+    def has_delete_permission(self, request, obj=None):
+        return False 
     
+class PredictionModelAdmin(admin.ModelAdmin):
+    list_display = ('name', 'model_file')
+    search_fields = ('name',)  # Allows searching by the 'name' field
+    list_filter = ('name',) 
+     
+admin.site.register(PredictionModel)   
 admin.site.register(StockLevel)   
 admin.site.register(AuditLog, AuditLogAdmin)
 admin.site.register(Category, CategoryAdmin)

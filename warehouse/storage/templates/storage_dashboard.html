@@ -1,0 +1,63 @@
+{% extends 'storage_base.html' %}
+{% load static %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/storage.css' %}">
+{% endblock extra_styles %}
+
+{% block content %}
+<div class="container">
+    <h1>Storage Dashboard</h1>
+    
+    <!-- Location List with Block Representation -->
+    <div class="location-list">
+        <h2>Location List</h2>
+        <div class="location-blocks">
+            {% for location in locations_with_status %}
+                <div class="location-block" style="background-color: {{ location.status_color }};">
+                    <span class="location-code">{{ location.code }}</span>
+                    <span class="location-status">{{ location.status_color|title }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Sensor Data Chart -->
+    <div class="sensor-chart">
+        <h2>Sensor Data Chart</h2>
+        <canvas id="sensorChart" width="400" height="400"></canvas>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/Chart.min.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var ctx = document.getElementById('sensorChart').getContext('2d');
+        var sensorDataChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ labels|safe }},
+                datasets: [{
+                    label: 'Sensor Data',
+                    data: {{ values|safe }},
+                    backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                    borderColor: 'rgb(53, 162, 235)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock extra_scripts %}
+
+

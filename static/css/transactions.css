@@ -1,0 +1,32 @@
+/* Container styles */
+.transaction-container {
+    height: 300px;
+    overflow-y: scroll;
+  }
+  
+  /* List styles */
+  .transaction-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .transaction-list li {
+    margin-bottom: 10px;
+  }
+  
+  /* Table styles */
+  .transaction-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .transaction-table th, .transaction-table td {
+    border: 1px solid #dddddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .transaction-table th {
+    background-color: #f2f2f2;
+  }
+  

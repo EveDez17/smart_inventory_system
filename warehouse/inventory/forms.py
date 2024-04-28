@@ -1,7 +1,8 @@
 from django import forms
-from .models import Address, Category, FoodProduct, Supplier
+from .models import Address, Category, FoodProduct, StockLevel, Supplier, Transaction
 from django.contrib.admin.widgets import AdminDateWidget
 from django.forms.widgets import TextInput, NumberInput, Textarea, Select
+from django.forms import SelectDateWidget
 
 class CategoryForm(forms.ModelForm):
     class Meta:
@@ -63,5 +64,22 @@ class SupplierForm(forms.ModelForm):
             'address': forms.HiddenInput()  
         }
         
+class StockLevelForm(forms.ModelForm):
+    class Meta:
+        model = StockLevel
+        fields = ['location', 'pick_face', 'product', 'quantity', 'batch_number', 'expiration_date']
+        widgets = {
+            'location': forms.Select(attrs={'class': 'form-control'}),
+            'pick_face': forms.Select(attrs={'class': 'form-control'}),
+            'product': forms.Select(attrs={'class': 'form-control'}),
+            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}),
+            'batch_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'expiration_date': SelectDateWidget(attrs={'class': 'form-control'}),  
+        }
+        
+class TransactionForm(forms.ModelForm):
+    class Meta:
+        model = Transaction
+        fields = ['transaction_type', 'status', 'amount', 'description', 'order', 'customer', 'supplier']
 
 

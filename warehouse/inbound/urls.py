@@ -8,7 +8,6 @@ from .views import (
     ProvisionalBayAssignmentListView,
     register_booking
 )
-from warehouse.inbound import views
 
 app_name='Inbound'
 

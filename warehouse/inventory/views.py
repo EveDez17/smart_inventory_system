@@ -1,15 +1,15 @@
 from django.views.generic import ListView
-from django.http import JsonResponse
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.views.generic import TemplateView
-
+from rest_framework.views import APIView
 from warehouse.inventory.pdf_utils import extract_data_from_pdf, process_data
 from warehouse.inventory.utils import prepare_pie_chart_data
-from .models import AuditLog, Category, FoodProduct, StockLevel, Supplier
+from .models import AuditLog, Category, FoodProduct, Report, StockLevel, Supplier, Transaction
 from django.urls import reverse, reverse_lazy
 from django.views.generic.edit import CreateView
 from django.views.generic.edit import DeleteView
 from django.shortcuts import get_object_or_404, redirect, render
-from .forms import AddressForm, CategoryForm, FoodProductForm, SupplierForm
+from .forms import AddressForm, CategoryForm, FoodProductForm, StockLevelForm, SupplierForm
 from django.views import View
 from django.db import transaction
 from django.views.generic.edit import UpdateView
@@ -172,17 +172,23 @@ class StockLevelListView(ListView):
     template_name = 'stock/stock_level_list.html'
     context_object_name = 'stock_levels'
 
-class StockLevelCreateView(CreateView):
-    model = StockLevel
-    template_name = 'stock/stock_level_form.html'
-    fields = ['location', 'pick_face', 'product', 'quantity', 'batch_number', 'expiration_date']
-    success_url = reverse_lazy('stock_level_list')
+def create_stock_level(request):
+    if request.method == 'POST':
+        form = StockLevelForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('inventory:stock_level_list')  # Redirect to the stock level list
+    else:
+        form = StockLevelForm()
+    return render(request, 'stock/stock_level_create.html', {'form': form})
 
-class StockLevelUpdateView(UpdateView):
-    model = StockLevel
-    template_name = 'stock/stock_level_form.html'
-    fields = ['location', 'pick_face', 'product', 'quantity', 'batch_number', 'expiration_date']
-    success_url = reverse_lazy('stock_level_list')
+def update_stock(request, stock_id):
+    if request.method == 'POST':
+        new_level = request.POST.get('new_stock_level')
+        stock = StockLevel.objects.get(pk=stock_id)
+        stock.level = new_level
+        stock.save()
+        return redirect('inventory:stock_level_list') 
 
 class StockLevelDeleteView(DeleteView):
     model = StockLevel
@@ -198,12 +204,53 @@ def stock_level_dashboard(request):
 
 def generate_pie_counts_from_pdf(request):
     if request.method == 'POST':
-        # Extract data from the provided PDF file
         pdf_file = request.FILES.get('pdf_file')
-        extracted_text = extract_data_from_pdf(pdf_file)
-        # Process the extracted text to identify categories and counts
-        categories, counts = process_data(extracted_text)
-        # Prepare data for rendering the pie chart
-        chart_data = prepare_pie_chart_data(categories, counts)
-        return render(request, 'stock/stock_level_dashboard.html', {'chart_data': chart_data})
-    return render(request, 'stock/generate_pie_counts_from_pdf.html') 
+        if not pdf_file:
+            # Handle the case where no file is uploaded
+            return HttpResponseBadRequest("No PDF file uploaded.")
+
+        try:
+            extracted_text = extract_data_from_pdf(pdf_file)
+            categories, counts = process_data(extracted_text)
+            chart_data = prepare_pie_chart_data(categories, counts)
+            return render(request, 'stock/stock_level_dashboard.html', {'chart_data': chart_data})
+        except Exception as e:
+            # Handle errors in processing, e.g., file format errors
+            return HttpResponseBadRequest(f"Error processing file: {str(e)}")
+
+    return render(request, 'stock/generate_pie_counts_from_pdf.html')
+
+#Transaction View
+
+def transaction_list(request):
+    transactions = Transaction.objects.all().order_by('-created_at')  # Getting all transactions ordered by creation date
+    return render(request, 'transaction/transaction_list.html', {'transactions': transactions})
+
+def transaction_detail(request, transaction_id):
+    transaction = get_object_or_404(Transaction, pk=transaction_id)
+    return render(request, 'transaction/transaction_detail.html', {'transaction': transaction})
+
+#Reports
+def reports_view(request):
+    # This view simply renders the reports main page.
+    return render(request, 'inventory/reports.html')
+
+def report_list_view(request):
+    # This view gathers data about all reports and passes it to the template.
+    reports = Report.objects.all()
+    report_data = []
+    for report in reports:
+        report_data.append({
+            'id': report.id,
+            'name': report.name,
+            'type': report.report_type,
+            'data': report.generate_report(),
+        })
+    return render(request, 'inventory/report-list.html', {'report_data': report_data})
+
+def report_detail_view(request, report_id):
+    # This view fetches a single report by its ID and passes its details to the template.
+    report = get_object_or_404(Report, id=report_id)
+    report_data = report.generate_report()
+    return render(request, 'inventory/report-detail.html', {'report': report, 'report_data': report_data})
+

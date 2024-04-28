@@ -30,6 +30,11 @@ def profile_view(request):
     # Assuming you pass some context like user details
     return render(request, 'dashboard_global/profile.html')
 
+
+def reports_view(request):
+    # Your view logic here
+    return render(request, 'reports.html')
+
 @login_required
 def settings_view(request):
     return render(request, 'dashboard_global/settings.html')

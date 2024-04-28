@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<h1>Reports</h1>
+<!-- Navigation link to report list -->
+<a href="{% url 'inventory:report-list' %}">View Report List</a>
+<!-- Your report content goes here -->
+{% endblock %}
+

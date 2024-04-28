@@ -174,6 +174,23 @@ class Location(models.Model):
         ).first()
         if not location:
             raise ValueError(f"No full pallets found for product {product.name}.")
+        
+    def latest_sensor_data(self):
+        # This will filter all the sensors related to the location,
+        # then get the latest SensorData entry for each of them
+        latest_data = []
+        for sensor in self.sensors.all():
+            latest_data_for_sensor = sensor.data.order_by('-timestamp').first()
+            if latest_data_for_sensor:
+                latest_data.append({
+                    'sensor': sensor,
+                    'data': latest_data_for_sensor.data,
+                    'timestamp': latest_data_for_sensor.timestamp
+                })
+        return latest_data
+
+    def __str__(self):
+        return f"Location {self.code}"
 
 
 class PNDLocation(Location):

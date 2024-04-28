@@ -43,7 +43,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'inbound:inbound_dashboard' %}">
                                 <span class="icon-container">
-                                    <img src="{% static 'icons/gatehouse_log.png' %}" alt="Inbound">
+                                    <img src="{% static 'icons/dashboard-icon.png' %}" alt="Inbound">
                                 </span>
                                 Inbound
                             </a>
@@ -65,11 +65,19 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard_global:dashboard' %}">
+                            <a class="nav-link" href="{% url 'storage:storage_dashboard' %}">
                                 <span class="icon-container">
                                     <img src="{% static 'icons/storage.png' %}" alt="Storage">
                                 </span>
                                 Storage
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'inventory:reports' %}">
+                                <span class="icon-container">
+                                    <img src="{% static 'icons/reports.png' %}" alt="Reports">
+                                </span>
+                                Reports
                             </a>
                         </li>
                         <li class="nav-item">

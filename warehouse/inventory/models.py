@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 import joblib
+from django.core.mail import send_mail
 from simple_history.models import HistoricalRecords
 from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
@@ -12,8 +13,10 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db import models
 from django.db.models import Count, Sum, Max, Avg
-from warehouse.storage.models import Location
-
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
+from django.db.models import Sum, Max, Count
 
 class HistoricalCategoryModel(models.Model):
     lft = models.IntegerField(null=True, blank=True)
@@ -301,6 +304,8 @@ class StockLevel(models.Model):
         return today > self.expiration_date
         
 
+
+
 class Report(models.Model):
     REPORT_CHOICES = [
         ('inventory', 'Inventory Report'),
@@ -343,6 +348,21 @@ class Report(models.Model):
                 .annotate(total_orders=Count('id'), max_order_amount=Max('total_amount'), total_amount=Sum('total_amount')) \
                 .order_by('-total_orders')
         return data
+
+    def supplier_report(self):
+        """ Generate a report on suppliers. """
+        # Implement the logic to generate the supplier report here
+        return "Supplier Report Data"
+
+    def shipment_report(self):
+        """ Generate a report on shipments. """
+        # Implement the logic to generate the shipment report here
+        return "Shipment Report Data"
+
+    def activity_report(self):
+        """ Generate a report on user activity. """
+        # Implement the logic to generate the user activity report here
+        return "User Activity Report Data"
 
     def maximums_report(self):
         """ Generate a report to find the maximum values across various entities. """
@@ -449,10 +469,41 @@ class PredictionModel(models.Model):
     name = models.CharField(max_length=255)
     model_file = models.FileField(upload_to='models/')
 
-    def predict(self, X):
-        # Load the model from the file each time before making a prediction
+    def predict_expiration_date(self, X):
+        """
+        Predicts the expiration date of a food product.
+        X should be appropriately formatted input data required by the model.
+        """
         model = joblib.load(self.model_file.path)
-        return model.predict(X)
+        predicted_date = model.predict(X)
+        return predicted_date
+
+    def check_and_alert(self, predicted_date, storage_temp):
+        """
+        Check if the predicted expiration date is within an alert threshold and
+        whether the storage temperature is within a safe range.
+        """
+        import datetime
+        today = datetime.date.today()
+        alert_threshold = today + datetime.timedelta(days=7)  # Alert if expiration is within 7 days
+
+        if predicted_date <= alert_threshold:
+            # Send an email alert about impending expiration
+            send_mail(
+                'Expiration Alert',
+                f'The food product with predicted expiration date on {predicted_date} is nearing expiration.',
+                settings.DEFAULT_FROM_EMAIL,
+                ['receiver@example.com']  # List of email addresses to alert
+            )
+
+        # Check storage temperature (this is a simplification; your logic may vary)
+        if not (2 <= storage_temp <= 8):  # Assuming optimal range is 2-8 degrees Celsius
+            send_mail(
+                'Temperature Alert',
+                f'The current storage temperature of {storage_temp}°C is outside the safe range.',
+                settings.DEFAULT_FROM_EMAIL,
+                ['receiver@example.com']  # Adjust as necessary
+            )
 
     def __str__(self):
         return self.name

@@ -2,57 +2,139 @@
 {% block title %}Stock Level Dashboard{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container-fluid py-4" style="background-color: #eaecef;">
+
+    <!-- Charts Section -->
     <div class="row">
-        <!-- Bar Chart -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">Stock Level Bar Chart</div>
+        <!-- Bar Chart Card -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">Stock Level Bar Chart</div>
                 <div class="card-body">
-                    <canvas id="stockChart" width="400" height="300"></canvas>
+                    <canvas id="stockChart"></canvas>
                 </div>
             </div>
         </div>
         
-        <!-- Pie Chart -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">Stock Level Pie Chart</div>
+        <!-- Pie Chart Card -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">Stock Level Pie Chart</div>
                 <div class="card-body">
-                    <canvas id="pieChart" width="400" height="300"></canvas>
+                    <canvas id="pieChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="container">
+    <!-- File Upload Section -->
     <div class="row">
-        <!-- Upload PDF Card -->
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-header">Upload PDF</div>
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning">Upload PDF</div>
                 <div class="card-body">
-                    <p>Generate pie counts from a PDF file.</p>
                     <form method="post" enctype="multipart/form-data" action="{% url 'inventory:generate_pie_counts_from_pdf' %}">
                         {% csrf_token %}
-                        <input type="file" name="pdf_file">
+                        <div class="mb-3">
+                            <label for="pdf_file" class="form-label">Generate pie counts from a PDF file.</label>
+                            <input type="file" name="pdf_file" class="form-control" id="pdf_file">
+                        </div>
                         <button type="submit" class="btn btn-primary">Generate Pie Counts</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+<div class="container">
+    <div class="row">
+        <!-- Stock Level List Card -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">Stock Levels</div>
+                <div class="card-body">
+                    <p>View and manage stock levels.</p>
+                    <a href="{% url 'inventory:stock_level_list' %}" class="btn btn-primary">View Stock Levels</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Stock Level Card -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">Add Stock Level</div>
+                <div class="card-body">
+                    <p>Add a new stock level entry.</p>
+                    <a href="{% url 'inventory:stock_level_create' %}" class="btn btn-success">Add Stock Level</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">Update Stock Level</div>
+                <div class="card-body">
+                    <p>Update an existing stock level.</p>
+                    <form id="updateStockForm" action="#" method="post">
+                        {% csrf_token %}
+                        <input type="number" name="new_stock_level" class="form-control mb-2" placeholder="Enter new stock level">
+                        <button type="submit" class="btn btn-info">Update Stock Level</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Delete Stock Level Card -->
+        <!-- Note: This also will need a JavaScript function to handle delete actions -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">Delete Stock Level</div>
+                <div class="card-body">
+                    <p>Delete a stock level entry.</p>
+                    <a href="#" class="btn btn-danger">Delete Stock Level</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+ <!-- Stock Levels Card -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">Stock Levels</div>
+                <div class="card-body">
+                    <p>View and manage stock levels.</p>
+                    <a href="{% url 'inventory:stock_level_list' %}" class="btn btn-info">View Stock Levels</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    document.getElementById('someElement').addEventListener('change', function() {
+        var stockId = this.value; // Assuming this value is the ID of the stock item
+        var form = document.getElementById('updateStockForm');
+        form.action = '/update-stock/' + stockId + '/';
+    });
+    </script>
+    
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Bar Chart
-    var ctx1 = document.getElementById('stockChart').getContext('2d');
-    var chartData1 = {{ chart_data1|safe }};
-    var myChart1 = new Chart(ctx1, {
+    // Placeholder data for the bar chart
+    var barChartData = {
+        labels: ['Product A', 'Product B', 'Product C'], // should be your product names
+        datasets: [{
+            label: 'Stock Quantity',
+            backgroundColor: 'rgb(54, 162, 235)',
+            borderColor: 'rgb(54, 162, 235)',
+            borderWidth: 1,
+            data: [10, 20, 30] // should be your stock quantity data
+        }]
+    };
+    
+    var ctxBar = document.getElementById('stockChart').getContext('2d');
+    var stockChart = new Chart(ctxBar, {
         type: 'bar',
-        data: chartData1,
+        data: barChartData,
         options: {
             scales: {
                 y: {
@@ -61,17 +143,34 @@
             }
         }
     });
-
-    // Pie Chart
-    var ctx2 = document.getElementById('pieChart').getContext('2d');
-    var chartData2 = {{ chart_data2|safe }};
-    var myChart2 = new Chart(ctx2, {
+    
+    // Placeholder data for the pie chart
+    var pieChartData = {
+        labels: ['Product A', 'Product B', 'Product C'], // should be your product names
+        datasets: [{
+            label: 'Stock Quantity',
+            backgroundColor: [
+                'rgb(255, 99, 132)',
+                'rgb(54, 162, 235)',
+                'rgb(255, 205, 86)'
+            ],
+            borderColor: [
+                'rgb(255, 99, 132)',
+                'rgb(54, 162, 235)',
+                'rgb(255, 205, 86)'
+            ],
+            data: [10, 20, 30] // should be your stock quantity data
+        }]
+    };
+    
+    var ctxPie = document.getElementById('pieChart').getContext('2d');
+    var pieChart = new Chart(ctxPie, {
         type: 'pie',
-        data: chartData2,
+        data: pieChartData,
         options: {
             responsive: true,
             maintainAspectRatio: false,
         }
     });
-</script>
+    </script>
 {% endblock %}

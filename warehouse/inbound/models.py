@@ -40,13 +40,27 @@ class ProvisionalBayAssignment(models.Model):
         return f"Provisional bay {self.provisional_bay} assigned to {self.gatehouse_booking}"
 
 class FinalBayAssignment(models.Model):
-    provisional_bay_assignment = models.OneToOneField(ProvisionalBayAssignment, on_delete=models.CASCADE)
+    provisional_bay_assignment = models.OneToOneField('ProvisionalBayAssignment', on_delete=models.CASCADE)
     final_bay = models.CharField(max_length=50)
     confirmed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     confirmed_at = models.DateTimeField(default=timezone.now)
     is_loaded = models.BooleanField(default=False, verbose_name=_("Loading Confirmed"))
     loaded_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Loaded At"))
-    loader = models.ForeignKey(User, related_name='loaded_bays', on_delete=models.SET_NULL, null=True, verbose_name=_("Loader"))
+    loader = models.ForeignKey(
+        User, 
+        related_name='loaded_bays', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        verbose_name=_("Loader")
+    )
+    tipper = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='operated_tippers', 
+        verbose_name=_("Assigned Tipper")
+    )
     history = HistoricalRecords()
 
     def confirm_loading(self, loader_user):
@@ -55,11 +69,17 @@ class FinalBayAssignment(models.Model):
             self.loaded_at = timezone.now()
             self.loader = loader_user
             self.save()
+            # Here you may want to update the tipper status as well
+            if self.tipper:
+                self.tipper.status = 'In Use'
+                self.tipper.save()
             return "Loading confirmed, vehicle ready for departure."
         return "Loading already confirmed."
 
     def __str__(self):
-        return f"Final bay {self.final_bay} confirmed for {self.provisional_bay_assignment}, Loaded: {self.is_loaded}"
+        loaded_status = "Loaded: Yes" if self.is_loaded else "Loaded: No"
+        tipper_info = f"Tipper: {self.tipper.code}" if self.tipper else "No tipper assigned"
+        return f"Final bay {self.final_bay} confirmed for {self.provisional_bay_assignment}, {loaded_status}, {tipper_info}"
 
 
 # Inbound class
@@ -108,7 +128,7 @@ class Receiving(models.Model):
     product = models.ForeignKey(
         'inventory.FoodProduct',
         on_delete=models.CASCADE,
-        related_name='receivings',  # This establishes the one-to-many relationship
+        related_name='receivings',  
         verbose_name=_("received product"),
         help_text=_("Select product being received")
     )

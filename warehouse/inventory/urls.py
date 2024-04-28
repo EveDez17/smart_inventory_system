@@ -32,10 +32,19 @@ urlpatterns = [
     #Stock Level URLS
     path('stock/dashboard/', views.StockLevelDashboardView.as_view(), name='stock_level_dashboard'),
     path('stock/levels/', views.StockLevelListView.as_view(), name='stock_level_list'),
-    path('stock/levels/create/', views.StockLevelCreateView.as_view(), name='stock_level_create'),
-    path('stock/levels/<int:pk>/update/', views.StockLevelUpdateView.as_view(), name='stock_level_update'),
+    path('stock_level_create/', views.create_stock_level, name='stock_level_create'),
+    path('update-stock/<int:stock_id>/', views.update_stock, name='update-stock'),
     path('stock/levels/<int:pk>/delete/', views.StockLevelDeleteView.as_view(), name='stock_level_delete'),
     path('dashboard/', views.stock_level_dashboard, name='stock_dashboard'),
     path('generate_pie_counts/', views.generate_pie_counts_from_pdf, name='generate_pie_counts_from_pdf'),
-     
+    
+    #Transaction URLS
+    
+    path('transactions/', views.transaction_list, name='transaction_list'),
+    path('transactions/<int:transaction_id>/', views.transaction_detail, name='transaction_detail'),
+    
+    #Reports
+    path('reports/', views.reports_view, name='reports'),
+    path('report-list/', views.report_list_view, name='report-list'),
+    path('report-detail/<int:report_id>/', views.report_detail_view, name='report-detail'),
 ]

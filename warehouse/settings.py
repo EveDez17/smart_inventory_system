@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
+from xml.parsers.expat import model
+
+from django.conf import settings
+import joblib
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -153,8 +157,13 @@ REST_FRAMEWORK = {
 }
 
 # Media files
+#BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+#model_path = os.path.join(settings.MEDIA_ROOT, 'demand_forecast_model.joblib')
+#joblib.dump(model, model_path)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

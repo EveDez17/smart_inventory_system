@@ -27,56 +27,61 @@ Inventory Dashboard | Smart Inventory System
         </div>
         <!-- End Search Form -->
 
+    <!-- Add New Product, Edit Product, and Delete Product Cards -->
+<div class="row mb-4">
     <!-- Add New Product Card -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card text-white bg-success mb-3">
-                <div class="card-header">Add New Product</div>
-                <div class="card-body">
-                    <p>Create a new SKU entry.</p>
-                    <a href="{% url 'inventory:food_product_create' %}" class="btn btn-success">Add New</a>
-                </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Add New Product</div>
+            <div class="card-body">
+                <p>Create a new SKU entry.</p>
+                <a href="{% url 'inventory:food_product_create' %}" class="btn btn-success">Add New</a>
             </div>
         </div>
-        
-          <!-- Edit Product Card with Dropdown Menu -->
-<div class="col-md-4">
-    <div class="card text-white bg-warning mb-3">
-        <div class="card-header">Edit Product</div>
-        <div class="card-body">
-            <p>Edit existing SKU.</p>
-            <form action="{% url 'inventory:food_product_edit_redirect' %}" method="post">
-                {% csrf_token %}
-                <select name="product_id" class="form-control" onchange="this.form.submit()">
-                    <option value="">Select a Product</option>
-                    {% for product in products %}
-                    <option value="{{ product.pk }}">{{ product.name }}</option>
-                    {% endfor %}
-                </select>
-            </form>
+    </div>
+
+    <!-- Edit Product Card with Dropdown Menu -->
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Edit Product</div>
+            <div class="card-body">
+                <p>Edit existing SKU.</p>
+                <form action="{% url 'inventory:food_product_edit_redirect' %}" method="post">
+                    {% csrf_token %}
+                    <select name="product_id" class="form-control" onchange="this.form.submit()">
+                        <option value="">Select a Product</option>
+                        {% for product in products %}
+                        <option value="{{ product.pk }}">{{ product.name }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-<div class="col-md-4">
-    <div class="card text-white bg-danger mb-3">
-        <div class="card-header">Delete Product</div>
-        <div class="card-body">
-            <p>Delete existing SKU.</p>
-            <form action="{% url 'inventory:food_product_delete_redirect' %}" method="post">
-                {% csrf_token %}
-                <select name="product_id" class="form-control" onchange="this.form.submit()">
-                    <option value="">Select a Product to Delete</option>
-                    {% for product in products %}
-                    <option value="{{ product.pk }}">{{ product.name }}</option>
-                    {% endfor %}
-                </select>
-            </form>
+
+    <!-- Delete Product Card -->
+    <div class="col-md-4">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-header">Delete Product</div>
+            <div class="card-body">
+                <p>Delete existing SKU.</p>
+                <form action="{% url 'inventory:food_product_delete_redirect' %}" method="post">
+                    {% csrf_token %}
+                    <select name="product_id" class="form-control" onchange="this.form.submit()">
+                        <option value="">Select a Product to Delete</option>
+                        {% for product in products %}
+                        <option value="{{ product.pk }}">{{ product.name }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- View Categories Card -->
+<!-- View Categories, View Audit Logs, and Stock Levels Cards -->
 <div class="row mb-4">
+    <!-- View Categories Card -->
     <div class="col-md-4">
         <div class="card text-white bg-info mb-3">
             <div class="card-header">View Categories</div>
@@ -86,18 +91,31 @@ Inventory Dashboard | Smart Inventory System
             </div>
         </div>
     </div>
-</div>
 
-<!-- View Audit Logs Card -->
-<div class="col-md-4">
-    <div class="card text-white bg-info mb-3">
-        <div class="card-header">View Audit Logs</div>
-        <div class="card-body">
-            <p>View a list of all audit logs.</p>
-            <a href="{% url 'inventory:audit_log_list' %}" class="btn btn-info">View Audit Logs</a>
+    <!-- View Audit Logs Card -->
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-header">View Audit Logs</div>
+            <div class="card-body">
+                <p>View a list of all audit logs.</p>
+                <a href="{% url 'inventory:audit_log_list' %}" class="btn btn-info">View Audit Logs</a>
+            </div>
         </div>
     </div>
-</div>
+    <!-- View Transaction Card -->
+    <div class="col-md-4">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-header">View Transaction</div>
+            <div class="card-body">
+                <p>View a list of all Transactions.</p>
+                <a href="{% url 'inventory:transaction_list' %}" class="btn btn-info">View Audit Logs</a>
+            </div>
+        </div>
+    </div>
+
+   
+
+
 
     <div class="table-responsive"> 
         <table class="table table-bordered table-hover">

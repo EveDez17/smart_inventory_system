@@ -12,14 +12,14 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
-from xml.parsers.expat import model
-
-from django.conf import settings
-import joblib
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+env_path = load_dotenv(os.path.join(BASE_DIR, '.virtual'))
+load_dotenv(env_path)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -27,10 +27,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'Ah4U2yxrWLe8UcH7PSELEKkwvPIEyC6kL7WQX15wPri6p0E7aKJDfbH6YfntjmgyaEk'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# SECURITY WARNING: Don't run with debug turned on in production!
+DEBUG = False
 
-ALLOWED_HOSTS = []
+# List of allowed host/domain names for this site
+ALLOWED_HOSTS = ['*']
+
+# Enforce HTTP Strict Transport Security (HSTS) for 1 year
+SECURE_HSTS_SECONDS = 31536000  # 1 year
+
+# Redirect all HTTP requests to HTTPS
+SECURE_SSL_REDIRECT = True
+
+# Use secure-only session cookies
+SESSION_COOKIE_SECURE = True
+
+# Use secure-only CSRF cookies
+CSRF_COOKIE_SECURE = True
+
+# Include subdomains in HTTP Strict Transport Security (HSTS) header
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# Preload your site in the browser's HSTS preload list
+SECURE_HSTS_PRELOAD = True
 
 
 
@@ -99,14 +118,16 @@ WSGI_APPLICATION = 'warehouse.wsgi.application'
 #    }
 #}
 
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'lp_db',                
+        'NAME': 'railway',                
         'USER': 'postgres',               
-        'PASSWORD': 'superuser',  
-        'HOST': 'localhost',              
-        'PORT': '5432',                    
+        'PASSWORD': 'qnrnasrucEKmsTjXmVNdsnABBtBoiysq',  
+        'HOST': 'roundhouse.proxy.rlwy.net',              
+        'PORT': '41269',                    
     }
 }
 

@@ -1,11 +1,318 @@
 {% extends 'base_dashboard.html' %}
+
 {% load static %}
+
 {% block title %}Dashboard | Smart Inventory System{% endblock %}
-{% block extra_styles %}
-<link rel="stylesheet" href="{% static 'css/dashboard_global.css' %}>
-{% endblock extra_styles %}
+
 {% block content %}
-    <h1>Dashboard</h1>
-    <p>Welcome to your dashboard!</p>
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container-fluid">
+    <h2 class="mt-3">Dashboard</h2>
+    <div class="container-fluid py-4">
+        <!-- Row for Charts -->
+        <div class="row">
+            <!-- Bar Chart Card -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Top Products by Stock</h4>
+                    </div>
+                    <div class="card-body overflow-auto" style="height: 300px;">
+                        <canvas id="topProductsByStock"></canvas>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Line Chart Card -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Sales Over Time</h4>
+                    </div>
+                    <div class="card-body overflow-auto" style="height: 300px;">
+                        <canvas id="salesOverTime"></canvas>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Pie Chart Card -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Product Category Distribution</h4>
+                    </div>
+                    <div class="card-body overflow-auto" style="height: 300px;">
+                        <canvas id="productCategoryDistribution"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Grid layout for cards -->
+    <div class="row">
+        <!-- Recent Gatehouse Bookings Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h4>Recent Gatehouse Bookings</h4>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for booking in recent_gatehouse_bookings %}
+                    <li class="list-group-item">{{ booking.driver_name }} from {{ booking.company }} - Arrived at {{ booking.arrival_time }}</li>
+                    {% empty %}
+                    <li class="list-group-item">No recent bookings.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Low Stock Products Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h4>Low Stock Products</h4>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for product in low_stock_products %}
+                    <li class="list-group-item">{{ product.name }} - Only {{ product.stock }} left in stock!</li>
+                    {% empty %}
+                    <li class="list-group-item">All products are sufficiently stocked.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Top 5 Products by Stock Chart Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h4>Top 5 Products by Stock</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="stockChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Row for To-Do List and Chat Notifications Cards -->
+    <div class="row">
+        <!-- To-Do List Column -->
+        <div class="col-md-6 mb-4">
+            <div class="card" style="height: 400px;">
+                <div class="card-header">
+                    To-Do List
+                </div>
+                <div class="card-body overflow-auto">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Check inventory levels <span class="badge badge-info float-right">2024-05-05</span></li>
+                        <li class="list-group-item">Schedule maintenance <span class="badge badge-info float-right">2024-05-10</span></li>
+                        <li class="list-group-item">Update product listings <span class="badge badge-info float-right">2024-05-15</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    <!-- Chat Notifications Column -->
+    <div class="col-md-6 mb-4">
+        <div class="card" style="height: 400px;">
+            <div class="card-header">
+                Chat Notifications
+            </div>
+            <div class="card-body overflow-auto">
+                <p>New message from Supplier ABC <span class="badge badge-secondary float-right">10:30 AM</span></p>
+                <p>Warehouse team chat updated <span class="badge badge-secondary float-right">Yesterday</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- FLT Tasks Card -->
+    <div class="row">
+        <!-- Recent FLT Tasks Column -->
+        <div class="col-md-4 mb-4">
+            <div class="card" style="height: 400px;">
+                <div class="card-header">
+                    Recent FLT Tasks
+                </div>
+                <div class="card-body overflow-auto">
+                    <p>No FLT tasks found.</p>
+                </div>
+            </div>
+        </div>
+
+    <!-- Additional row for Inbound and Outbound task cards -->
+    <div class="row">
+        <!-- Inbound Tasks Card -->
+        <div class="col-md-4 my-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Recent Inbound Tasks</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for task in recent_inbound_tasks %}
+                        <li class="list-group-item">
+                            Received {{ task.product.name }} - 
+                            Quantity: {{ task.quantity }} on {{ task.receiving_date }} - 
+                            Status: {{ task.get_status_display }}
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No recent inbound tasks.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outbound Tasks Card -->
+        <div class="col-md-4 my-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Outbound Tasks In Progress</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for task in recent_outbound_tasks %}
+                        <li class="list-group-item">
+                            {{ task.product.name }} - 
+                            To: {{ task.destination_location }} - 
+                            Qty: {{ task.quantity }} - 
+                            Started at: {{ task.start_time }}
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item">No outbound tasks in progress.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <script>
+        // Pass data from Django to JavaScript
+        var productLabels = {{ product_labels | safe }};
+        var stockData = {{ stock_data | safe }};
+
+        // Setup the chart
+        var ctx = document.getElementById('stockChart').getContext('2d');
+        var stockChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: productLabels,
+                datasets: [{
+                    label: 'Total Stock',
+                    data: stockData,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+            }
+        });
+    </script>
+</div>
 {% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Bar Chart: Top Products by Stock
+        var ctxBar = document.getElementById('topProductsByStock').getContext('2d');
+        var topProductsByStockChart = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['Product A', 'Product B', 'Product C', 'Product D', 'Product E'],
+                datasets: [{
+                    label: 'Stock',
+                    data: [50, 25, 15, 8, 5],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Line Chart: Sales Over Time
+        var ctxLine = document.getElementById('salesOverTime').getContext('2d');
+        var salesOverTimeChart = new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May'],
+                datasets: [{
+                    label: 'Sales',
+                    data: [15000, 20000, 25000, 30000, 40000],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true } },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Pie Chart: Product Category Distribution
+        var ctxPie = document.getElementById('productCategoryDistribution').getContext('2d');
+        var productCategoryDistributionChart = new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: ['Category A', 'Category B', 'Category C'],
+                datasets: [{
+                    label: 'Distribution',
+                    data: [55, 30, 15],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(255,99,132,1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    });
+</script>
+{% endblock extra_js %}
+
+
+
+
 

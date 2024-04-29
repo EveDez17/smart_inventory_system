@@ -148,29 +148,38 @@ def register(request):
             employee.save()
             user.save()
 
+            # Confirm the redirection URL is correctly configured in urls.py
             return redirect('users:pending_approval')
         else:
+            # Check what errors are present if the form is not valid
+            print(form.errors)  # Adding logging to see the errors might help
             return render(request, 'register.html', {'form': form})
     else:
         form = EmployeeRegistrationForm()
     return render(request, 'register.html', {'form': form})
+
+
+
+
 
 @login_required
 @permission_required('users.can_approve_employee', raise_exception=True)
 def approve_user(request, employee_id):
     employee = get_object_or_404(Employee, id=employee_id)
     
+    # Check if the employee already has a user account linked
     if employee.user:
         messages.error(request, 'This employee already has a linked user account.')
         return render(request, 'registration/registration_error.html', {'message': 'This employee already has a linked user account.'})
     
     try:
-        # Create a user for the employee if it does not exist
+        # Extract username from the employee's email
         username = employee.email.split('@')[0] if employee.email else None
         if not username:
             messages.error(request, 'Invalid email address.')
             return render(request, 'registration/registration_error.html', {'message': 'Invalid email address provided.'})
         
+        # Create a new user for the employee
         user = User.objects.create_user(
             username=username,
             email=employee.email,
@@ -182,9 +191,10 @@ def approve_user(request, employee_id):
         employee.user.save()
         employee.save()
 
+        # Sending the approval email
         send_mail(
             'Your Account Has Been Approved',
-            f'Here are your login credentials. Username: {user.username} Please reset your password upon first login.',
+            f'Here are your login credentials. Username: {user.username}. Please reset your password upon first login.',
             'from@example.com',
             [user.email],
             fail_silently=False,
@@ -208,6 +218,9 @@ def user_password_reset(request):
         form = PasswordChangeForm(request.user)
     return render(request, 'registration/password_reset.html', {'form': form})
 
+import logging
+logger = logging.getLogger(__name__)
+
 # Pending Approval
 @login_required
 @permission_required('users.can_view_pending', raise_exception=True)
@@ -225,7 +238,7 @@ def deny_user(request, user_id):
     user.save()
 
     messages.info(request, f"User {user.username} has been denied access.")
-    return redirect('dashboard:dashboard')
+    return redirect('users:users_dashboard')
 # Define the signal
 approve_user_signal = Signal()
 
@@ -254,11 +267,11 @@ def approve_user(request, user_id):
     except User.DoesNotExist:
         # User with the given ID does not exist
         messages.error(request, "User not found.")
-        return redirect('dashboard:dashboard')
+        return redirect('users:users_dashboard')
     
 # ResetPasword for new User
 class CustomPasswordResetView(FormView):
-    template_name = 'registration/newuser_password_reset.html'
+    template_name = 'registration/new_user_password_reset.html'
     success_url = reverse_lazy('users:new_user_password_reset_done')
     form_class = PasswordResetForm
 
@@ -306,7 +319,7 @@ def send_password_reset_email(request):
     return HttpResponse('Email sent successfully.')
 
 class PasswordResetDoneView(TemplateView):
-    template_name = 'registration/newuser_password_done.html'
+    template_name = 'registration/new_user_password_done.html'
     
 
 def custom_logout(request):
@@ -319,5 +332,13 @@ def custom_logout(request):
 #Dashboard Page
 def users_dashboard(request):
     users_to_approve = User.objects.filter(is_approved=False)  # or any other condition
-    return render(request, 'dashboard:dashboard', {'users_to_approve': users_to_approve})
+    return render(request, 'dashboard/users_dashboard.html', {'users_to_approve': users_to_approve})
+
+class UsersDashboardView(TemplateView):
+    template_name = 'users_dashboard.html'
+    context_object_name = 'users_to_approve'
+    
+    def get_queryset(self):
+        # Filter users based on some criteria, e.g., users who are not yet approved
+        return User.objects.filter(is_approved=False)  
 

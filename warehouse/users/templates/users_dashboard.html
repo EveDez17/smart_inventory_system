@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>User Dashboard</h1>
+    <div class="row">
+        {% for user in users_to_approve %}
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ user.username }}</h5>
+                    <p class="card-text">Pending approval for {{ user.username }}</p>
+                    <a href="{% url 'approve_user' user.id %}" class="btn btn-success">Approve</a>
+                    <a href="{% url 'deny_user' user.id %}" class="btn btn-danger">Deny</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No users pending approval.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+

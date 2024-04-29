@@ -2,7 +2,7 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render
 from rest_framework.views import APIView
 from django.shortcuts import render, redirect
-from warehouse.inbound.models import FinalBayAssignment, ProvisionalBayAssignment
+from warehouse.inbound.models import FinalBayAssignment, GatehouseBooking, Inbound, ProvisionalBayAssignment
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic.edit import FormMixin
 from django.urls import reverse_lazy
@@ -17,6 +17,31 @@ User = get_user_model()
 class InboundDashboardView(APIView):
     def get(self, request):
         return render(request, 'inbound_dashboard.html')
+    
+
+
+def inbound_dashboard(request):
+    recent_activities = GatehouseBooking.objects.order_by('-arrival_time')[:5]
+    summary_data = {
+        'total_bookings': GatehouseBooking.objects.count(),
+        'total_inbounds': Inbound.objects.count(),
+        # Add other summary items...
+    }
+    
+    # Imagine you have some system notifications or messages to display
+    system_messages = ['System will be down for maintenance at midnight.', 'New features have been added to the inventory section.']
+    
+    # And some generic announcements or alerts
+    alerts = ['New parking policy will be effective from next Monday.', 'Remember to verify your contact details in your profile.']
+    
+    context = {
+        'recent_activities': recent_activities,
+        'summary_data': summary_data,
+        'system_messages': system_messages,
+        'alerts': alerts,
+    }
+    return render(request, 'inbound/inbound_dashboard.html', context)
+
 
 
 class GatehouseLogView(APIView):

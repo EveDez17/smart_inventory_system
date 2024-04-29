@@ -2,12 +2,12 @@
 {% block title %}Stock Level Dashboard{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4" style="background-color: #eaecef;">
+<div class="container-fluid py-4" style="background-color: #005288;">
 
     <!-- Charts Section -->
     <div class="row">
         <!-- Bar Chart Card -->
-        <div class="col-lg-6 mb-4">
+        <div class="col-lg-4 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">Stock Level Bar Chart</div>
                 <div class="card-body">
@@ -17,7 +17,7 @@
         </div>
         
         <!-- Pie Chart Card -->
-        <div class="col-lg-6 mb-4">
+        <div class="col-lg-4 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-success text-white">Stock Level Pie Chart</div>
                 <div class="card-body">
@@ -25,11 +25,9 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- File Upload Section -->
-    <div class="row">
-        <div class="col-md-6 col-lg-4 mb-4">
+        <!-- PDF Upload Section -->
+        <div class="col-lg-4 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-warning">Upload PDF</div>
                 <div class="card-body">
@@ -45,11 +43,12 @@
             </div>
         </div>
     </div>
-<div class="container">
+
+    <!-- Action Buttons Row -->
     <div class="row">
-        <!-- Stock Level List Card -->
+        <!-- View Stock Levels -->
         <div class="col-md-3">
-            <div class="card mb-4">
+            <div class="card mb-4 shadow-sm">
                 <div class="card-header">Stock Levels</div>
                 <div class="card-body">
                     <p>View and manage stock levels.</p>
@@ -58,9 +57,9 @@
             </div>
         </div>
 
-        <!-- Add Stock Level Card -->
+        <!-- Add Stock Level -->
         <div class="col-md-3">
-            <div class="card mb-4">
+            <div class="card mb-4 shadow-sm">
                 <div class="card-header">Add Stock Level</div>
                 <div class="card-body">
                     <p>Add a new stock level entry.</p>
@@ -69,8 +68,9 @@
             </div>
         </div>
 
+        <!-- Update Stock Level -->
         <div class="col-md-3">
-            <div class="card mb-4">
+            <div class="card mb-4 shadow-sm">
                 <div class="card-header">Update Stock Level</div>
                 <div class="card-body">
                     <p>Update an existing stock level.</p>
@@ -82,11 +82,10 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Delete Stock Level Card -->
-        <!-- Note: This also will need a JavaScript function to handle delete actions -->
+
+        <!-- Delete Stock Level -->
         <div class="col-md-3">
-            <div class="card mb-4">
+            <div class="card mb-4 shadow-sm">
                 <div class="card-header">Delete Stock Level</div>
                 <div class="card-body">
                     <p>Delete a stock level entry.</p>
@@ -96,18 +95,6 @@
         </div>
     </div>
 </div>
-
- <!-- Stock Levels Card -->
-        <div class="col-md-3">
-            <div class="card mb-4">
-                <div class="card-header">Stock Levels</div>
-                <div class="card-body">
-                    <p>View and manage stock levels.</p>
-                    <a href="{% url 'inventory:stock_level_list' %}" class="btn btn-info">View Stock Levels</a>
-                </div>
-            </div>
-        </div>
-    </div>
 
 <script>
     document.getElementById('someElement').addEventListener('change', function() {

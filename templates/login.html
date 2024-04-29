@@ -6,6 +6,15 @@
 
 {% block extra_styles %}
 <link rel="stylesheet" href="{% static 'css/login.css' %}?v=2">
+<style>
+    a > i.fab {
+        color: #1DA1F2; /* Twitter color */
+        margin-right: 5px; /* Spacing between icon and text */
+    }
+    a > i.fab.fa-linkedin-in {
+        color: #0077B5; /* LinkedIn color */
+    }
+</style>
 {% endblock extra_styles %}
 
 {% block content %}
@@ -13,9 +22,7 @@
     <div class="left-pane" style="background-image: url('{% static 'images/login.jpg' %}');">
     </div>
     <div class="right-pane">
-        <div class="avatar">
-            <!-- Placeholder for the avatar icon -->
-        </div>
+
         <form method="post" action="{% url 'users:login' %}" class="login-form">
             {% csrf_token %}
             <div id="login-error" style="display:none;color:red;"></div>
@@ -38,8 +45,9 @@
         </form>
         <div class="footer">
             <p>
-                <a href="https://twitter.com/route69" target="_blank">Twitter</a> |
-                <a href="https://linkedin.com/in/route69" target="_blank">LinkedIn</a>
+                <a href="https://twitter.com/route69" target="_blank"><i class="fab fa-twitter"></i> Twitter</a> |
+                <a href="https://linkedin.com/in/route69" target="_blank"><i class="fab fa-linkedin-in"></i> LinkedIn</a>
+
             </p>
         </div>
     </div>

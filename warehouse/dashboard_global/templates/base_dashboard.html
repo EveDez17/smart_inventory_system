@@ -26,7 +26,7 @@
                     {% if request.user.profile.photo %}
                         <img src="{{ request.user.profile.photo.url }}" alt="{{ request.user.get_full_name }}" class="profile-avatar">
                     {% else %}
-                        <img src="{% static 'images/users/gatesecurity.jpg' %}" alt="Default Avatar" class="profile-avatar">
+                        <img src="{% static 'images/users/Warehouse Manager.jpg' %}" alt="Default Avatar" class="profile-avatar">
                     {% endif %}
                     <span class="profile-name">{{ request.user.get_full_name }}</span>
                 </div>                              

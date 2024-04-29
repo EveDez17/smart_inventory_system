@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
 {% load static %}
-    
+
 {% block title %}Register | Smart Inventory System{% endblock title %}
-{% block extrahead %}   
+{% block extrahead %}
 {% block extra_styles %}
    <link rel="stylesheet" href="{% static 'css/register.css' %}">
 {% endblock extra_styles %}
@@ -12,59 +12,99 @@
 <div class="register-page">
     <div class="register-container">
         <h2 class="text-center">Register</h2>
-        <form method="post" enctype="multipart/form-data" novalidate >
+        <form method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
+
+            <!-- Display non-field errors that aren't associated with a specific field -->
+            {% if form.non_field_errors %}
+                <div class="errorlist">
+                    {% for error in form.non_field_errors %}
+                        <p style="color: red">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Fields grouped by rows -->
             <div class="form-row">
                 <div class="form-field">
                     <label for="id_employee_first_name">Employee first name:</label>
-                    <input type="text" name="employee_first_name" class="form-control" maxlength="100" required id="id_employee_first_name">
+                    <input type="text" name="employee_first_name" class="form-control" maxlength="100" required id="id_employee_first_name" autofocus>
+                    {% for error in form.employee_first_name.errors %}
+                        <div style="color: red">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="form-field">
                     <label for="id_employee_last_name">Employee last name:</label>
                     <input type="text" name="employee_last_name" class="form-control" maxlength="100" required id="id_employee_last_name">
+                    {% for error in form.employee_last_name.errors %}
+                        <div style="color: red">{{ error }}</div>
+                    {% endfor %}
                 </div>
             </div>
-        
+
             <div class="form-row">
                 <div class="form-field">
                     <label for="id_employee_street_number">Employee street number:</label>
                     <input type="text" name="employee_street_number" class="form-control" maxlength="128" required id="id_employee_street_number">
+                    {% for error in form.employee_street_number.errors %}
+                        <div style="color: red">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="form-field">
                     <label for="id_employee_street_name">Employee street name:</label>
                     <input type="text" name="employee_street_name" class="form-control" maxlength="255" required id="id_employee_street_name">
+                    {% for error in form.employee_street_name.errors %}
+                        <div style="color: red">{{ error }}</div>
+                    {% endfor %}
                 </div>
             </div>
+
             <div class="form-row">
                 <div class="form-field">
                     <label for="id_employee_city">Employee city:</label>
                     <input type="text" name="employee_city" class="form-control" maxlength="255" required id="id_employee_city">
+                    {% for error in form.employee_city.errors %}
+                        <div style="color: red">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="form-field">
                     <label for="id_employee_county">Employee county:</label>
                     <input type="text" name="employee_county" class="form-control" maxlength="255" required id="id_employee_county">
+                    {% for error in form.employee_county.errors %}
+                        <div style="color: red">{{ error }}</div>
+                    {% endfor %}
                 </div>
             </div>
-        
+
             <div class="form-row">
                 <div class="form-field">
                     <label for="id_employee_country">Employee country:</label>
                     <input type="text" name="employee_country" class="form-control" maxlength="255" required id="id_employee_country">
+                    {% for error in form.employee_country.errors %}
+                        <div style="color: red">{{ error }}</div>
+                    {% endfor %}
                 </div>
                 <div class="form-field">
                     <label for="id_employee_post_code">Employee post code:</label>
                     <input type="text" name="employee_post_code" class="form-control" maxlength="20" required id="id_employee_post_code">
+                    {% for error in form.employee_post_code.errors %}
+                        <div style="color: red">{{ error }}</div>
+                    {% endfor %}
                 </div>
             </div>
+
             <div class="form-row">
                 <div class="form-field">
                     <label for="id_date_hired">Date hired:</label>
-                    <input type="date" name="date_hired" value="2024-04-20" class="form-control" required id="id_date_hired">
+                    <input type="date" name="date_hired" class="form-control" required id="id_date_hired" value="2024-04-20">
+                    {% for error in form.date_hired.errors %}
+                        <div style="color: red">{{ error }}</div>
+                    {% endfor %}
                 </div>
-                    <div class="form-field">
-                        <label for="id_role">Role:</label>
-                        <select name="role" class="form-control" id="id_role">
-                            <option value="" selected>---------</option>
+                <div class="form-field">
+                    <label for="id_role">Role:</label>
+                    <select name="role" class="form-control" id="id_role">
+                        <option value="" selected>---------</option>
                             <option value="1">Warehouse Common</option>
                             <option value="2">Gatehouse</option>
                             <option value="3">Receptionist</option>
@@ -76,36 +116,44 @@
                             <option value="9">Inventory Team Leader</option>
                             <option value="10">Inventory Manager</option>
                             <option value="11">Operational Manager</option>
-                        </select>
-                    </div>
+                    </select>
+                    {% for error in form.role.errors %}
+                        <div style="color: red">{{ error }}</div>
+                    {% endfor %}
                 </div>
-                <div class="form-row">
-                    <div class="form-field">
-                        <label for="id_email">Email:</label>
-                        <input type="email" name="email" class="form-control" maxlength="320" required id="id_email">
-                    </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="id_email">Email:</label>
+                    <input type="email" name="email" class="form-control" maxlength="320" required id="id_email">
+                    {% for error in form.email.errors %}
+                        <div style="color: red">{{ error }}</div>
+                    {% endfor %}
                 </div>
-                <div class="form-row">
-                    <div class="form-field">
-                        <label for="id_photo">Photo:</label>
-                        <input type="file" name="photo" class="form-control" id="id_photo">
-                    </div>
-                </div>                
-                 <!-- Terms and Conditions Checkbox -->
+                <div class="form-field">
+                    <label for="id_photo">Photo:</label>
+                    <input type="file" name="photo" class="form-control" id="id_photo">
+                </div>
+            </div>
+
+            <!-- Terms and Conditions Checkbox -->
             <div class="form-row text-center">
                 <div class="form-field checkbox-group">
                     <input type="checkbox" id="terms" name="terms" required>
                     <label for="terms">By signing up, I agree with the Terms of Use & Privacy Policy</label>
                 </div>
             </div>
-            <!-- Submit Button Row -->
+
+            <!-- Submit Button -->
             <div class="form-row">
                 <div class="form-field">
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
-            </div> 
-             <!-- Login Link -->
-             <div class="form-row text-center login-link">
+            </div>
+
+            <!-- Login Link -->
+            <div class="form-row text-center login-link">
                 Already have an account? <a href="{% url 'users:login' %}">Please Login</a>
             </div>
         </form>

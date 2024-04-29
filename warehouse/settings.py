@@ -75,6 +75,8 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'simple_history',
     'channels',
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -121,17 +123,21 @@ WSGI_APPLICATION = 'warehouse.wsgi.application'
 
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'railway'),                
-        'USER': os.getenv('DB_USER', 'postgres'),               
-        'PASSWORD': os.getenv('DB_PASSWORD'),  
-        'HOST': os.getenv('DB_HOST', 'roundhouse.proxy.rlwy.net'),              
-        'PORT': os.getenv('DB_PORT', '41269'),                    
-    }
-}
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': os.getenv('DB_NAME', 'railway'),                
+#        'USER': os.getenv('DB_USER', 'postgres'),               
+#        'PASSWORD': os.getenv('DB_PASSWORD'),  
+#        'HOST': os.getenv('DB_HOST', 'roundhouse.proxy.rlwy.net'),              
+#        'PORT': os.getenv('DB_PORT', '41269'),                    
+#    }
+#}
 
+import dj_database_url
+# DATABASES['default'] = dj_database_url.config()
+#updated
+DATABASES = {'default': dj_database_url.config(default='postgresql://postgres:qnrnasrucEKmsTjXmVNdsnABBtBoiysq@roundhouse.proxy.rlwy.net:41269/railway')}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -173,6 +179,15 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv("CLOUD_NAME"),
+    'API_KEY': os.getenv("API_KEY"),
+    'API_SECRET': os.getenv("API_SECRET"),
+}
+STATICFILES_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+
+
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
@@ -184,6 +199,7 @@ REST_FRAMEWORK = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
 
 #model_path = os.path.join(settings.MEDIA_ROOT, 'demand_forecast_model.joblib')
 #joblib.dump(model, model_path)
@@ -241,22 +257,5 @@ else:
     SITE_DOMAIN = 'yourdomain.com'
     EMAIL_PROTOCOL = 'https'
     
-#Production Error DEBAUG
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': '/path/to/django/debug.log',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
+#Production Error DEBAUF
+

@@ -9,6 +9,8 @@ from django.core.validators import RegexValidator
 
  # STORAGE 
 
+# Zone model
+
 class Zone(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
@@ -18,6 +20,8 @@ class Zone(models.Model):
 
     def __str__(self):
         return self.name
+    
+# Aisle model
 
 class Aisle(models.Model):
     zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name='aisles', verbose_name=_("Zone"))
@@ -37,6 +41,8 @@ class Aisle(models.Model):
     def __str__(self):
         return f"Aisle {self.aisle_letter} in Zone {self.zone.name}"
     
+# Rack model
+    
 class Rack(models.Model):
     aisle = models.ForeignKey(Aisle, on_delete=models.CASCADE, related_name='racks', verbose_name=_("Aisle"))
     rack_number = models.CharField(max_length=50, verbose_name=_("Rack Number"))
@@ -44,6 +50,8 @@ class Rack(models.Model):
 
     def __str__(self):
         return f"Rack {self.rack_number} in {self.aisle}"
+    
+# Level model
 
 class Level(models.Model):
     rack = models.ForeignKey('Rack', on_delete=models.CASCADE, related_name='levels')
@@ -64,7 +72,8 @@ class Level(models.Model):
     def __str__(self):
         return f"{self.get_level_display()} in Rack {self.rack.rack_number}, Aisle {self.rack.aisle.aisle_letter}"
 
-    
+# Location model
+  
 class Location(models.Model):
     code = models.CharField(
         max_length=50,
@@ -192,6 +201,7 @@ class Location(models.Model):
     def __str__(self):
         return f"Location {self.code}"
 
+# PNDLocation model inherit Location model by passing attributs
 
 class PNDLocation(Location):
     temperature_range = models.CharField(
@@ -219,7 +229,7 @@ class PNDLocation(Location):
     def __str__(self):
         return super().__str__() + " - PND"
     
-
+# PickFace model
     
 class PickFace(Location):
     pick_face_code = models.CharField(max_length=50, unique=True, verbose_name=_("Pick Face Code"))
@@ -231,7 +241,7 @@ class PickFace(Location):
     low_stock_threshold = models.PositiveIntegerField(default=10, verbose_name=_("Low Stock Threshold"))
     target_stock_level = models.PositiveIntegerField(default=100, verbose_name=_("Target Stock Level"))
     
-    
+     # Fields and methods specific to PickFace
 
     def __str__(self):
         return f"{self.pick_face_code} - {super().__str__()} - {self.category.name}"
@@ -269,6 +279,8 @@ class PickFace(Location):
     def calculate_replenishment_quantity(self):
         """Calculate the quantity needed to replenish the pick face to the target level."""
         return max(self.target_stock_level - self.current_stock, 0)
+    
+# Signal to handle low stock PickFace
 
 @receiver(post_save, sender=PickFace)
 def handle_low_stock_pick_face(sender, instance, **kwargs):
@@ -287,6 +299,8 @@ def handle_low_stock_pick_face(sender, instance, **kwargs):
 
 # IoT Integretion
 
+# Sensor model
+
 class Sensor(models.Model):
     location = models.ForeignKey('Location', on_delete=models.CASCADE, related_name='sensors')
     sensor_type = models.CharField(max_length=50, verbose_name=_("Sensor Type"))
@@ -295,6 +309,8 @@ class Sensor(models.Model):
 
     def __str__(self):
         return f"{self.sensor_type} Sensor at {self.location.code} - {self.get_status_display()}"
+
+# SensorData model
 
 class SensorData(models.Model):
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE, related_name='data')

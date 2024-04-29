@@ -5,7 +5,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from warehouse.users.managers import UserManager
+from warehouse.users.managers import UserManager # Importing the custom user manager
+
+# Department model
 
 class Department(models.Model):
     department_name = models.CharField(max_length=255)
@@ -14,7 +16,10 @@ class Department(models.Model):
     def __str__(self):
         return self.department_name
 
+# Role model
+
 class Role(models.Model):
+    # Choices for role titles
     class RoleChoices(models.TextChoices):
         WAREHOUSE_COMMON = "WAREHOUSE_COMMON", _('Warehouse Common')
         GATEHOUSE = "GATEHOUSE", _('Gatehouse')
@@ -39,13 +44,17 @@ class Role(models.Model):
     def __str__(self):
         return self.get_role_title_display()
     
+# Custom User model
 
 class User(AbstractUser):
+    # One-to-one relationship with Employee model
     employee = models.OneToOneField('Employee', on_delete=models.CASCADE, related_name='user_profile', null=True, blank=True)
 
     is_approved = models.BooleanField(default=False)
 
     objects = UserManager()  # Using the custom user manager
+    
+     # Method to get the absolute URL of the user
 
     def get_absolute_url(self):
         return reverse("users:detail", kwargs={"username": self.username})
@@ -54,6 +63,8 @@ class User(AbstractUser):
         if self.employee:
             return f"{self.employee.employee_first_name} {self.employee.employee_last_name} ({self.username})"
         return self.username
+    
+# Employee model
 
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee_profile')  # Adjusted related_name
@@ -71,6 +82,8 @@ class Employee(models.Model):
     
     def __str__(self):
         return f"{self.employee_first_name} {self.employee_last_name}"
+    
+# EmployeeRole model
     
 class EmployeeRole(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)

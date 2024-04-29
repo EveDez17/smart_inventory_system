@@ -150,10 +150,10 @@ def register(request):
 
             return redirect('users:pending_approval')
         else:
-            return render(request, 'registration/register.html', {'form': form})
+            return render(request, 'register.html', {'form': form})
     else:
         form = EmployeeRegistrationForm()
-    return render(request, 'registration/register.html', {'form': form})
+    return render(request, 'register.html', {'form': form})
 
 @login_required
 @permission_required('users.can_approve_employee', raise_exception=True)

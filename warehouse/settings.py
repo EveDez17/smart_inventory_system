@@ -18,14 +18,15 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-env_path = load_dotenv(os.path.join(BASE_DIR, '.virtual'))
+env_path = load_dotenv(os.path.join(BASE_DIR, '.env'))
 load_dotenv(env_path)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'Ah4U2yxrWLe8UcH7PSELEKkwvPIEyC6kL7WQX15wPri6p0E7aKJDfbH6YfntjmgyaEk'
+SECRET_KEY = os.getenv('SECRET_KEY')
+
 
 # SECURITY WARNING: Don't run with debug turned on in production!
 DEBUG = False
@@ -123,13 +124,14 @@ WSGI_APPLICATION = 'warehouse.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',                
-        'USER': 'postgres',               
-        'PASSWORD': 'qnrnasrucEKmsTjXmVNdsnABBtBoiysq',  
-        'HOST': 'roundhouse.proxy.rlwy.net',              
-        'PORT': '41269',                    
+        'NAME': os.getenv('DB_NAME', 'railway'),                
+        'USER': os.getenv('DB_USER', 'postgres'),               
+        'PASSWORD': os.getenv('DB_PASSWORD'),  
+        'HOST': os.getenv('DB_HOST', 'roundhouse.proxy.rlwy.net'),              
+        'PORT': os.getenv('DB_PORT', '41269'),                    
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -238,3 +240,23 @@ else:
     DEFAULT_FROM_EMAIL = 'webmaster@example.com'
     SITE_DOMAIN = 'yourdomain.com'
     EMAIL_PROTOCOL = 'https'
+    
+#Production Error DEBAUG
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/path/to/django/debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

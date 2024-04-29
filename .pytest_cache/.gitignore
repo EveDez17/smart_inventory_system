@@ -10,4 +10,4 @@ venv
 /static
 .vscode
 .idea/
-.virtual
+.env

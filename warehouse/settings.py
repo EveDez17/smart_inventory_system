@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
+
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -58,6 +59,7 @@ SECURE_HSTS_PRELOAD = True
 # Application definition
 
 INSTALLED_APPS = [
+    'cloudinary_storage',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -75,7 +77,6 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     'simple_history',
     'channels',
-    'cloudinary_storage',
     'cloudinary',
 ]
 
@@ -179,9 +180,9 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-import cloudinary.api
 
-import os
+load_dotenv()
+
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
@@ -189,6 +190,7 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
 }
 
+STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
 
 MEDIAFILES_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

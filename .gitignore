@@ -1,0 +1,12 @@
+*.log
+*.pot
+*.pyc
+_pycache_/
+local_settings.py
+db.sqlite3
+/media
+/static
+.vscode
+.idea/
+.env
+virtual

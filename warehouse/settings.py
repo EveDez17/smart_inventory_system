@@ -15,11 +15,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-from environ import Env
-env = Env()
-Env.read_env()
 
-ENVIRONMENT = env('ENVIRONMENT', default='production')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,10 +32,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 
 # SECURITY WARNING: Don't run with debug turned on in production!
-if ENVIRONMENT == 'development':
-    DEBUG = True
-else:
-    DEBUG = False
+DEBUG = False
 
 # List of allowed host/domain names for this site
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'smartinventorysystem.up.railway.app']

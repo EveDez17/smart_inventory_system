@@ -13,7 +13,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 
 from pathlib import Path
+from django.conf import ENVIRONMENT_VARIABLE
 from dotenv import load_dotenv
+from psycopg2 import DatabaseError
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,7 +35,10 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = False
 
 # List of allowed host/domain names for this site
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'smartinventorysystem.up.railway.app']
+
+CSRF_TRUSTED_ORIGINS = ['https://smartinventorysystem.up.railway.app']
+
 
 # Enforce HTTP Strict Transport Security (HSTS) for 1 year
 SECURE_HSTS_SECONDS = 31536000  # 1 year
@@ -136,9 +141,27 @@ WSGI_APPLICATION = 'warehouse.wsgi.application'
 #}
 
 import dj_database_url
-# DATABASES['default'] = dj_database_url.config()
-#updated
-DATABASES = {'default': dj_database_url.config(default='postgresql://postgres:qnrnasrucEKmsTjXmVNdsnABBtBoiysq@roundhouse.proxy.rlwy.net:41269/railway')}
+import os
+
+import os
+import dj_database_url
+
+# Default configuration using SQLite for development
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+
+# Override with Railway's PostgreSQL in production or if locally testing the Railway database
+ENVIRONMENT = os.getenv('ENVIRONMENT_VARIABLE', 'development')
+USE_RAILWAY_DB_LOCALLY = os.getenv('USE_RAILWAY_DB_LOCALLY', 'False') == 'False'
+
+if ENVIRONMENT == 'production' or USE_RAILWAY_DB_LOCALLY:
+    DATABASES['default'] = dj_database_url.parse(os.getenv('DATABASE_URL'))
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

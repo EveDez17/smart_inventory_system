@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
-
+import dj_database_url
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -21,43 +21,24 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-env_path = load_dotenv(os.path.join(BASE_DIR, '.env'))
-load_dotenv(env_path)
+# Load environment variables
+dotenv_path = BASE_DIR / '.env'
+load_dotenv(dotenv_path)
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# Security settings
 SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-
-# SECURITY WARNING: Don't run with debug turned on in production!
-DEBUG = False
-
-# List of allowed host/domain names for this site
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'smartinventorysystem.up.railway.app']
-
-CSRF_TRUSTED_ORIGINS = ['https://smartinventorysystem.up.railway.app']
-
-
-# Enforce HTTP Strict Transport Security (HSTS) for 1 year
-SECURE_HSTS_SECONDS = 31536000  # 1 year
-
-# Redirect all HTTP requests to HTTPS
+# Security enhancements
 SECURE_SSL_REDIRECT = True
-
-# Use secure-only session cookies
 SESSION_COOKIE_SECURE = True
-
-# Use secure-only CSRF cookies
 CSRF_COOKIE_SECURE = True
-
-# Include subdomains in HTTP Strict Transport Security (HSTS) header
+SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-
-# Preload your site in the browser's HSTS preload list
 SECURE_HSTS_PRELOAD = True
-
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://smartinventorysystem.up.railway.app').split(',')
 
 
 
@@ -122,23 +103,10 @@ WSGI_APPLICATION = 'warehouse.wsgi.application'
 
 
 
-import os
-import dj_database_url
-
-# Default configuration using SQLite for development
+# Database configuration using dj_database_url for Railway-hosted PostgreSQL
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
 }
-
-# Override with Railway's PostgreSQL in production or if locally testing the Railway database
-ENVIRONMENT = os.getenv('ENVIRONMENT_VARIABLE', 'development')
-USE_RAILWAY_DB_LOCALLY = os.getenv('USE_RAILWAY_DB_LOCALLY', 'False') == 'False'
-
-if ENVIRONMENT == 'production' or USE_RAILWAY_DB_LOCALLY:
-    DATABASES['default'] = dj_database_url.parse(os.getenv('DATABASE_URL'))
 
 
 
@@ -176,26 +144,21 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+# Cloudinary settings for static and media management
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-
-load_dotenv()
-
+MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
     'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
 }
-
-STATIC_URL = '/static/'
-STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
-
-MEDIAFILES_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 
@@ -235,9 +198,9 @@ REST_FRAMEWORK = {
 
 
 
-# Celery Settings
-CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Using Redis as a broker
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Using Redis to store task results
+# Celery configuration for task management
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -252,22 +215,17 @@ LOGOUT_REDIRECT_URL = 'users:login'
 #Custom Cookie
 CSRF_FAILURE_VIEW = 'warehouse.users.views.csrf_failure'
 
-# Development environment settings
+# Email settings for development and production
 if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Emails will be printed to the console
-    SITE_DOMAIN = 'localhost'
-    EMAIL_PROTOCOL = 'http'
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Emails printed to console for development
 else:
-    # Production environment settings
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.your-email-host.com'
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Real SMTP backend for production
+    EMAIL_HOST = 'smtp.example.com'
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = 'your-email@example.com'
     EMAIL_HOST_PASSWORD = 'your-email-password'
     DEFAULT_FROM_EMAIL = 'webmaster@example.com'
-    SITE_DOMAIN = 'yourdomain.com'
-    EMAIL_PROTOCOL = 'https'
     
 
 

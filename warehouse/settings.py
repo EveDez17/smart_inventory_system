@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
+import dj_database_url
 from dotenv import load_dotenv
 
 
@@ -100,20 +101,21 @@ WSGI_APPLICATION = 'warehouse.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# Load environment variables from .env file
+load_dotenv()
 
+# Get the DATABASE_URL from the environment
+DATABASE_URL = os.getenv('DATABASE_URL')
+if not DATABASE_URL:
+    raise Exception("DATABASE_URL not found in environment variables.")
 
-# Database configuration using dj_database_url for Railway-hosted PostgreSQL
-
+# Configure the default database with dj-database-url
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'), 
-        'PORT': os.getenv('DB_PORT'),  
-    }
+    'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
 }
+
+
+
 
 
 # Password validation

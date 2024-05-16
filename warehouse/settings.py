@@ -105,20 +105,16 @@ WSGI_APPLICATION = 'warehouse.wsgi.application'
 
 
 # Database configuration using dj_database_url for Railway-hosted PostgreSQL
-# Function to get environment variables safely
-def get_env_variable(var_name):
-    try:
-        return os.environ[var_name]
-    except KeyError:
-        error_msg = f'Set the {var_name} environment variable'
-        raise ImproperlyConfigured(error_msg)
 
-# Database configuration using dj_database_url for Railway-hosted PostgreSQL
-DATABASE_URL = get_env_variable('DATABASE_URL')  # Ensures that the variable must be set
-
-# Use dj_database_url to parse the DATABASE_URL
 DATABASES = {
-    'default': dj_database_url.parse(DATABASE_URL, ssl_require=True)  # Enable SSL if required
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'lp_db',
+        'USER': 'postgres',
+        'PASSWORD': 'superuser',
+        'HOST': 'w3-django-project.cdxmgq9zqqlr.us-east-1.rds.amazonaws.com',
+        'PORT': '5432'
+    }
 }
 
 # Password validation

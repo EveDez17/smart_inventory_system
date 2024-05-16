@@ -110,13 +110,11 @@ DATABASES = {
         'NAME': os.getenv('POSTGRES_DB', 'default_db_name'),
         'USER': os.getenv('POSTGRES_USER', 'default_user'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'default_password'),
-        'HOST': os.getenv('RAILWAY_TCP_PROXY_DOMAIN', 'localhost'),
-        'PORT': os.getenv('RAILWAY_TCP_PROXY_PORT', '5432'),
-        'OPTIONS': {
-            'sslmode': os.getenv('SSL_MODE', 'prefer'),  # Adjust default as necessary
-        },
+        'HOST': os.getenv('DB_HOST', 'localhost'),  # or another host if applicable
+        'PORT': os.getenv('DB_PORT', '5432'),  # default PostgreSQL port
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

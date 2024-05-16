@@ -1,6 +1,10 @@
 version: '3.8'
 services:
   web:
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
     build: .
     ports:
       - "8000:8000"

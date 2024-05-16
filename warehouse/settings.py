@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 
 
@@ -104,15 +105,21 @@ WSGI_APPLICATION = 'warehouse.wsgi.application'
 
 
 # Database configuration using dj_database_url for Railway-hosted PostgreSQL
-# Load the environment variable that contains the database URL
-DATABASE_URL = os.getenv('DATABASE_URL')
+# Function to get environment variables safely
+def get_env_variable(var_name):
+    try:
+        return os.environ[var_name]
+    except KeyError:
+        error_msg = f'Set the {var_name} environment variable'
+        raise ImproperlyConfigured(error_msg)
 
-# Use dj-database-url to parse the DATABASE_URL
+# Database configuration using dj_database_url for Railway-hosted PostgreSQL
+DATABASE_URL = get_env_variable('DATABASE_URL')  # Ensures that the variable must be set
+
+# Use dj_database_url to parse the DATABASE_URL
 DATABASES = {
-    'default': dj_database_url.parse(DATABASE_URL)
+    'default': dj_database_url.parse(DATABASE_URL, ssl_require=True)  # Enable SSL if required
 }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

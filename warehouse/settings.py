@@ -107,11 +107,11 @@ WSGI_APPLICATION = 'warehouse.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'default_db_name'),
-        'USER': os.getenv('POSTGRES_USER', 'default_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'default_password'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),  # or another host if applicable
-        'PORT': os.getenv('DB_PORT', '5432'),  # default PostgreSQL port
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'), 
+        'PORT': os.getenv('DB_PORT'),  
     }
 }
 

@@ -1,0 +1,48 @@
+{% extends 'inbound_base.html' %}
+{% load static %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/inbound.css' %}">
+{% endblock extra_styles %}
+{% block content %}
+<div class="dashboard-container">
+    <h1>Welcome to the Dashboard</h1>
+    
+    <!-- System Alerts -->
+    {% for alert in alerts %}
+    <div class="alert">
+        {{ alert }}
+    </div>
+    {% endfor %}
+
+    <!-- System Messages -->
+    {% for message in system_messages %}
+    <div class="system-message">
+        {{ message }}
+    </div>
+    {% endfor %}
+
+    <!-- Summary Data -->
+    <div class="summary">
+        {% for key, value in summary_data.items %}
+        <div class="summary-item">
+            <div class="summary-key">{{ key|title }}</div>
+            <div class="summary-value">{{ value }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Recent Activities -->
+    <h2>Recent Activities</h2>
+    <ul>
+        {% for activity in recent_activities %}
+        <li>{{ activity }}</li>
+        {% empty %}
+        <li>No recent activities.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Other sections of your dashboard -->
+    <!-- ... -->
+
+</div>
+{% endblock %}

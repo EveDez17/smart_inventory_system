@@ -1,0 +1,13 @@
+# Created by pytest automatically.
+*.log
+*.pot
+*.pyc
+_pycache_/
+local_settings.py
+db.sqlite3
+/media
+venv
+/static
+.vscode
+.idea/
+.env

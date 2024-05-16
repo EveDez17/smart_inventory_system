@@ -11,39 +11,59 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
+import dj_database_url
 from pathlib import Path
+from dotenv import load_dotenv
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+# Load environment variables
+dotenv_path = BASE_DIR / '.env'
+load_dotenv(dotenv_path)
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*x8uhiav##az69zd45nkznox!e9c_138(608l3lrohubjq7bdn'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Security settings
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-ALLOWED_HOSTS = []
+# Security enhancements
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://smartinventorysystem.up.railway.app').split(',')
+
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'cloudinary_storage',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'warehouse.inventory.apps.InventoryConfig',
     'warehouse.users.apps.UsersConfig',
+    'warehouse.storage',
+    'warehouse.inventory.apps.InventoryConfig',
+    'warehouse.inbound.apps.InboundConfig',
+    'warehouse.outbound',
+    'warehouse.dashboard_global.apps.DashboardGlobalConfig',
+    'rest_framework',
     'crispy_forms',
     'crispy_bootstrap5',
     'simple_history',
     'channels',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -54,6 +74,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'warehouse.urls'
@@ -80,23 +101,14 @@ WSGI_APPLICATION = 'warehouse.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-#DATABASES = {
-#   'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': BASE_DIR / 'db.sqlite3',
-#    }
-#}
 
+
+# Database configuration using dj_database_url for Railway-hosted PostgreSQL
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'lp_db',                # This should match POSTGRES_DB from your Docker Compose file
-        'USER': 'postgres',                # This should match POSTGRES_USER from your Docker Compose file
-        'PASSWORD': 'superuser',  # This should match POSTGRES_PASSWORD from your Docker Compose file
-        'HOST': 'localhost',               # Use 'localhost' or '127.0.0.1' for local development
-        'PORT': '5432',                    # Default PostgreSQL port
-    }
+    'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
 }
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -132,26 +144,63 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+# Cloudinary settings for static and media management
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
+}
+
+
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+}
+
+# Media files
+#BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
+
+#model_path = os.path.join(settings.MEDIA_ROOT, 'demand_forecast_model.joblib')
+#joblib.dump(model, model_path)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Define allowed template packs for crispy forms
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
+# Set the default template pack for crispy forms
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}
 
-# Celery Settings
-CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Using Redis as a broker
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Using Redis to store task results
+
+
+# Celery configuration for task management
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -160,14 +209,23 @@ CELERY_TIMEZONE = 'UTC'
 #Custom User
 AUTH_USER_MODEL = 'users.User'
 
+LOGIN_REDIRECT_URL = 'dashboard:dashboard'  # Adjust if namespace:path is different
+LOGOUT_REDIRECT_URL = 'users:login'  
+
 #Custom Cookie
 CSRF_FAILURE_VIEW = 'warehouse.users.views.csrf_failure'
 
-# Email settings for sending mail
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.your-email-host.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@example.com'
-EMAIL_HOST_PASSWORD = 'your-email-password'
-DEFAULT_FROM_EMAIL = 'webmaster@example.com'
+# Email settings for development and production
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Emails printed to console for development
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Real SMTP backend for production
+    EMAIL_HOST = 'smtp.example.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = 'your-email@example.com'
+    EMAIL_HOST_PASSWORD = 'your-email-password'
+    DEFAULT_FROM_EMAIL = 'webmaster@example.com'
+    
+
+

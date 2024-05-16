@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Audit Log List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Filter Audit Logs Form -->
+    <form action="{% url 'inventory:audit_log_list' %}" method="get" class="mb-3">
+        <div class="row">
+            <div class="col-md-3">
+                <label for="action">Action:</label>
+                <select name="action" id="action" class="form-control">
+                    <option value="">Select Action</option>
+                    <option value="Start">Task Started</option>
+                    <option value="Complete">Task Completed</option>
+                    <option value="Interrupt">Task Interrupted</option>
+                    <!-- Add other action options as needed -->
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="user">User:</label>
+                <input type="text" name="user" id="user" class="form-control" placeholder="Enter User">
+            </div>
+            <div class="col-md-3">
+                <label for="timestamp">Timestamp:</label>
+                <input type="date" name="timestamp" id="timestamp" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label>&nbsp;</label><br>
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Audit Log List -->
+    <div class="card text-white bg-info mb-3">
+        <div class="card-header">Audit Log List</div>
+        <div class="card-body">
+            <h2 class="card-title">Audit Log List</h2>
+            <ul class="list-group">
+                {% for audit_log in audit_logs %}
+                    <li class="list-group-item">
+                        <strong>Action:</strong> {{ audit_log.get_action_display }} <br>
+                        <strong>User:</strong> {{ audit_log.user.username }} <br>
+                        <strong>Timestamp:</strong> {{ audit_log.timestamp }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Return Button -->
+    <a href="{% url 'inventory:inventory_dashboard' %}" class="btn btn-secondary">Return</a>
+</div>
+{% endblock %}
+

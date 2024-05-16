@@ -15,19 +15,33 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, re_path, include
+from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('warehouse.users.urls')),  # No need for the 'namespace' if you're not using it
-    # Other global paths can be added here.
+    
+    path('users/', include('warehouse.users.urls', namespace='users')),
+    path('inventory/', include(('warehouse.inventory.urls', 'inventory'), namespace='inventory')),
+    path('inbound/', include('warehouse.inbound.urls', namespace='inbound')),
+    path('outbound/', include(('warehouse.outbound.urls', 'outbound'), namespace='outbound')),
+    path('storage/', include(('warehouse.storage.urls', 'storage'), namespace='storage')),
+    path('dashboard-global/', include('warehouse.dashboard_global.urls', namespace='dashboard_global')),
+    
 ]
 
-# Only add this if you're in DEBUG mode to serve static files during development
+# Serve static and media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
+
+# Catch-all for SPA front-end, placed last to ensure it doesn't catch API and admin paths
+urlpatterns += [
+    re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='index'),
+]
+
+
+
 
 

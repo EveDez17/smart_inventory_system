@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Details{% endblock %}
+
+{% block content %}
+<h1>Report: {{ report.name }}</h1>
+<h2>Type: {{ report.type }}</h2>
+<ul>
+    {% for item in report_data %}
+        <li>{{ item }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}
+

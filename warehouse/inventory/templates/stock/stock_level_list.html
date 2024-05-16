@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Stock Level List</h2>
+    <div class="row">
+        {% for stock_level in stock_levels %}
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    {{ stock_level.product.name }} at {{ stock_level.location.name }}
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Quantity: {{ stock_level.quantity }}</p>
+                    <p class="card-text">Batch: {{ stock_level.batch_number }}</p>
+                    <p class="card-text">Expires: {{ stock_level.expiration_date|date:"Y-m-d" }}</p>
+                    <a href="{% url 'stock_level_update' stock_level.id %}" class="btn btn-info btn-sm">Edit</a>
+                    <a href="{% url 'stock_level_delete' stock_level.id %}" class="btn btn-danger btn-sm">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col">
+            <p>No stock levels available.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

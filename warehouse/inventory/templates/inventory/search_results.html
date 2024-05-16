@@ -1,0 +1,55 @@
+{% extends 'base.html' %}  <!-- Make sure the path to 'base.html' is correct -->
+{% load static %}
+
+{% block content %}
+<div class="container mt-3">
+    <h1 style="text-align: center;">Search Results</h1>
+
+    <!-- Include the search bar at the top of the search results page -->
+    <div class="row justify-content-center mt-3 mb-3">
+        <div class="col-md-6">
+            <form method="get" action="{% url 'inventory:inventory_search_results' %}" class="input-group">
+                <input type="text" class="form-control" placeholder="Search SKU" name="search_query" value="{{ request.GET.search_query }}">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <h2>Inventory List</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Name</th> <!-- Adjusted to include a name column -->
+                        <th>Description</th> <!-- Assuming you have descriptions -->
+                        <th>Quantity</th>
+                        <th>Unit Price</th> 
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %} 
+                    <tr>
+                        <td>{{ product.sku }}</td>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.description }}</td>
+                        <td>{{ product.quantity }}</td>
+                        <td>{{ product.unit_price }}</td>
+                        <td>
+                            <a href="{% url 'inventory:product_detail' product.pk %}" class="btn btn-info btn-sm">View Details</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No results found.</td> 
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

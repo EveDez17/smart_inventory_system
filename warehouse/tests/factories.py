@@ -1,23 +1,25 @@
 from datetime import datetime, timedelta
 import factory
 from faker import Faker
-import faker
 import random
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from factory.django import DjangoModelFactory
+from factory import Faker, Sequence, LazyAttribute, Iterator, RelatedFactoryList
 from pytest_factoryboy import register
+from warehouse.inbound.models import FLTTask, FinalBayAssignment, GatehouseBooking, Inbound, ProvisionalBayAssignment, PutawayTask, Receiving
 from warehouse.inventory import models
-from warehouse.inventory.models import Address, Aisle, AuditLog, Category, Customer, FLTTask, FinalBayAssignment, FoodProduct, GatehouseBooking, LLOPTask, Level, Location, Order, OrderItem, OrderPickingTask, Outbound, PickFace, ProductLocation, ProvisionalBayAssignment, Rack, ReplenishmentRequest, ReplenishmentTask, StockLevel,  VNATask, Zone
+from warehouse.outbound.models import Customer, LLOPTask, Order, OrderItem, OrderPickingTask, Outbound, ProductLocation, ReplenishmentPickingTask, ReplenishmentRequest, ReplenishmentTask, VNATask
+from warehouse.storage.models import Aisle, Level, Location, PNDLocation, PickFace, Rack, Zone
+import factory
 
-
-fake = Faker()
+fake = Faker('en_US')
 
 
 
 class CategoryFactory(DjangoModelFactory):
     class Meta:
-        model = Category
+        model = models.Category
 
     name = factory.Sequence(lambda n: f"Category{n}")
     slug = factory.LazyAttribute(lambda x: f"category-{random.randint(1000, 9999)}")
@@ -26,7 +28,7 @@ register(CategoryFactory)
 
 class AddressFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Address
+        model = models.Address
 
     street_number = factory.Sequence(lambda n: f"{1000 + n}")
     street_name = factory.Faker('street_name')
@@ -51,32 +53,35 @@ class SupplierFactory(DjangoModelFactory):
 
 register(SupplierFactory)
 
-FAKE = faker.Faker()
+
+
 
 class FoodProductFactory(DjangoModelFactory):
     class Meta:
-        model = FoodProduct
+        model = models.FoodProduct
 
-    sku = factory.Sequence(lambda n: f"SKU{n:05d}")
-    name = factory.Faker('name')
-    description = factory.Faker('sentence')
-    quantity = factory.Faker('random_int', min=1, max=1000)  # Ensures quantity is always non-negative
-    unit_price = factory.Faker('pydecimal', right_digits=2, positive=True, min_value=1, max_value=100)
+    sku_sequence = Sequence(lambda n: f"SKU{n:05d}")  # Define a sequence for SKUs
+
+    sku = LazyAttribute(lambda o: next(o.sku_sequence))  # Use sku_sequence attribute to generate unique SKUs
+    name = Faker('name')
+    description = Faker('sentence')
+    quantity = Faker('random_int', min=1, max=1000)  # Ensures quantity is always non-negative
+    unit_price = Faker('pydecimal', right_digits=2, positive=True, min_value=1, max_value=100)
     category = factory.SubFactory(CategoryFactory)
-    suppliers = factory.RelatedFactoryList(
+    suppliers = RelatedFactoryList(
         SupplierFactory,
         factory_related_name='products',
         size=3  # Assumes each product has 3 suppliers
     )
-    is_high_demand = factory.Faker('boolean')
-    batch_number = factory.Sequence(lambda n: f"Batch{n:03d}")
-    storage_temperature = factory.Iterator(["0°C-4°C", "5°C-10°C", "Ambient"])
-    date_received = factory.Faker('date_this_decade')
-    expiration_date = factory.LazyAttribute(lambda o: o.date_received + timedelta(days=365))
-    supplier = factory.Faker('company')
+    is_high_demand = Faker('boolean')
+    batch_number = Sequence(lambda n: f"Batch{n:03d}")
+    storage_temperature = Iterator(["0°C-4°C", "5°C-10°C", "Ambient"])
+    date_received = Faker('date_this_decade')
+    expiration_date = LazyAttribute(lambda o: o.date_received + timedelta(days=365))
+    supplier = Faker('company')
     last_updated_by = None  # No user associated
     updated_at = factory.LazyFunction(timezone.now)
-    stock = factory.Faker('random_int', min=0, max=1000)
+    stock = Faker('random_int', min=0, max=1000)
 
     @factory.post_generation
     def add_suppliers(self, create, extracted, **kwargs):
@@ -89,7 +94,7 @@ class FoodProductFactory(DjangoModelFactory):
 
 class ReceivingFactory(DjangoModelFactory):
     class Meta:
-        model = models.Receiving
+        model = Receiving
         skip_postgeneration_save = True
 
     product = factory.SubFactory(FoodProductFactory)
@@ -158,7 +163,7 @@ register(FinalBayAssignmentFactory)
 
 class InboundFactory(DjangoModelFactory):
     class Meta:
-        model = models.Inbound
+        model = Inbound
         skip_postgeneration_save = True
 
     final_bay_assignment = factory.SubFactory(FinalBayAssignmentFactory)
@@ -235,7 +240,7 @@ class LocationFactory(DjangoModelFactory):
 
 class PNDLocationFactory(LocationFactory):
     class Meta:
-        model = models.PNDLocation
+        model = PNDLocation
         skip_postgeneration_save = True
 
     temperature_range = factory.Iterator(["2-4°C", "5-10°C", "None"])
@@ -255,7 +260,7 @@ class PNDLocationFactory(LocationFactory):
 
 class PutawayTaskFactory(DjangoModelFactory):
     class Meta:
-        model = models.PutawayTask
+        model = PutawayTask
         skip_postgeneration_save = True
 
     inbound = factory.SubFactory(InboundFactory)
@@ -439,7 +444,7 @@ class ProductLocationFactory(factory.django.DjangoModelFactory):
     
 class OrderFactory(DjangoModelFactory):
     class Meta:
-        model = models.Order 
+        model = Order 
   
 
 register(OrderFactory)
@@ -510,7 +515,7 @@ register(ReplenishmentRequestFactory)
 
 class ReplenishmentPickingTaskFactory(DjangoModelFactory):
     class Meta:
-        model = models.ReplenishmentPickingTask
+        model = ReplenishmentPickingTask
 
     replenishment_request = factory.SubFactory(ReplenishmentRequestFactory)
     product = factory.SubFactory(FoodProductFactory)
@@ -572,7 +577,7 @@ class PickFaceFactory(LocationFactory):
     
 class StockLevelFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = StockLevel
+        model = models.StockLevel
         skip_postgeneration_save=True
 
     location = factory.SubFactory(LocationFactory)
@@ -623,7 +628,7 @@ class LLOPTaskFactory(factory.django.DjangoModelFactory):
             return
 
         # Ensure source location has enough stock
-        source_stock, _ = StockLevel.objects.get_or_create(
+        source_stock, _ = models.StockLevel.objects.get_or_create(
             location=self.source_location,
             product=self.product,
             defaults={'quantity': self.quantity + 50}  # Ensures sufficient stock
@@ -632,7 +637,7 @@ class LLOPTaskFactory(factory.django.DjangoModelFactory):
         source_stock.save()
 
         # Ensure destination is ready to receive
-        StockLevel.objects.get_or_create(
+        models.StockLevel.objects.get_or_create(
             location=self.destination_location,
             product=self.product,
             defaults={'quantity': 0}

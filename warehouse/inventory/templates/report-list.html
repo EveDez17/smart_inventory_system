@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}List of Reports{% endblock %}
+
+{% block content %}
+<h1>List of Reports</h1>
+<ul>
+    {% for report in report_data %}
+        <li>
+            <a href="{% url 'inventory:report-detail' report.id %}">
+                <strong>{{ report.name }}</strong> - {{ report.type }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}
+

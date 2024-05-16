@@ -1,0 +1,21 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.location-list {
+    margin-bottom: 20px;
+}
+
+.location-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.location-list li {
+    margin-bottom: 10px;
+}
+
+.sensor-chart canvas {
+    border: 1px solid #ddd;
+}

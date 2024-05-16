@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <h1 style="text-align: center;">SKU Details</h1>
+    <div class="row">
+        <div class="col">
+            <h2>{{ sku.name }}</h2>
+            <p><strong>SKU:</strong> {{ sku.sku }}</p>
+            <p><strong>Description:</strong> {{ sku.description }}</p>
+            <p><strong>Quantity:</strong> {{ sku.quantity }}</p>
+            <p><strong>Unit Price:</strong> {{ sku.unit_price }}</p>
+            <p><strong>Category:</strong> {{ sku.category.name }}</p> <!-- Assuming category is a related object with a name field -->
+            <p><strong>Batch Number:</strong> {{ sku.batch_number }}</p>
+            <p><strong>Storage Temperature:</strong> {{ sku.storage_temperature }}</p>
+            <p><strong>Date Received:</strong> {{ sku.date_received|date:"Y-m-d" }}</p>
+            <p><strong>Expiration Date:</strong> {{ sku.expiration_date|date:"Y-m-d" }}</p>
+            <p><strong>High Demand:</strong> {{ sku.is_high_demand|yesno:"Yes,No" }}</p>
+            
+            <!-- If the suppliers is a many-to-many field -->
+            <p><strong>Suppliers:</strong> 
+                {% for supplier in sku.suppliers.all %}
+                    {{ supplier.name }}
+                {% empty %}
+                    No suppliers.
+                {% endfor %}
+            </p>
+            
+            <!-- Assuming 'last_updated_by' is a user model instance -->
+            <p><strong>Last Updated By:</strong> {{ sku.last_updated_by.get_full_name }}</p>
+            
+            <a href="{% url 'inventory:inventory_dashboard' %}" class="btn btn-secondary">Return to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

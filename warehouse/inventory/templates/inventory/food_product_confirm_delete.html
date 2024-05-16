@@ -1,0 +1,39 @@
+<!-- food_product_confirm_delete.html -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Delete Food Product</h2>
+    <p>Are you sure you want to delete "{{ object.name }}"?</p>
+    <!-- Add an identifier to the form, such as an ID -->
+    <form id="delete-form" method="post" action="{% url 'inventory:product_delete' object.pk %}">
+        {% csrf_token %}
+        <input type="button" value="Confirm Delete" id="delete-confirm" class="btn btn-danger"/>
+    </form>
+</div>
+<script>
+document.getElementById('delete-confirm').addEventListener('click', function() {
+    const form = document.getElementById('delete-form');
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+            'X-CSRFToken': form.querySelector('[name="csrfmiddlewaretoken"]').value,
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Redirect to the dashboard
+            window.location.href = data.redirect_url;
+        } else {
+            // Handle any errors
+            alert('There was a problem deleting the product.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+</script>
+{% endblock %}
+

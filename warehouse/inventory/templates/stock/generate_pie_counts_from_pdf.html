@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Upload PDF{% endblock %}
+{% block content %}
+    <h1>Upload PDF</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="pdf_file">
+        <button type="submit">Generate Pie Counts</button>
+    </form>
+{% endblock %}

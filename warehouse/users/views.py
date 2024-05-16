@@ -1,19 +1,30 @@
+from django.dispatch import Signal
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
-from warehouse.users.admin import CustomUserCreationForm
-from warehouse.users.models import User
+from django.contrib.auth.decorators import permission_required, login_required
+from django.shortcuts import redirect, render, get_object_or_404
+from warehouse import settings
+from warehouse.users.models import Employee, User
 from .forms import EmployeeRegistrationForm
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
+from django.contrib.auth import get_user_model
+from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.views.generic.edit import FormView
+from django.utils.crypto import get_random_string
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
+from django.views.generic import TemplateView
+from django.utils.encoding import force_bytes
 import qrcode
-from django.urls import reverse
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse_lazy
+from django.contrib import messages
+from django.urls import reverse
 from django.http import JsonResponse
 from io import BytesIO
-from django.middleware.csrf import get_token
-from django.contrib import messages
-from django.middleware.csrf import get_token
+from django.core.mail import send_mail
 import logging
 
 
@@ -24,61 +35,51 @@ logger = logging.getLogger(__name__)
 def csrf_failure(request, reason=""):
     context = {'reason': reason}
     return render(request, "errors/csrf_failure.html", context)
+
 #Base Page
-def home(request):
-    return render(request, "home.html")
+class HomePageView(TemplateView):
+    template_name = 'index.html'
 
 #Login Page
-logger = logging.getLogger(__name__)
-
 def login_view(request):
     if request.method == 'POST':
-        # Log the received CSRF token
-        received_csrf_token = request.POST.get('csrfmiddlewaretoken', '')
-        logger.info(f"Received CSRF token: {received_csrf_token}")
-
-        # Get the CSRF token expected by Django
-        expected_csrf_token = get_token(request)
-        logger.info(f"Expected CSRF token: {expected_csrf_token}")
-
-        email = request.POST.get('username')  # Assuming the username field is used for the email
-        password = request.POST.get('password')
-        user = authenticate(request, username=email, password=password)  # Use authenticate correctly
-
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                return redirect(reverse('demo:dashboard'))  # Ensure 'demo:dashboard' is correctly defined in urls.py
-            else:
-                return render(request, 'login.html', {'error': 'Your account is disabled.'})
-        else:
-            # Return an error message to the login template
-            return render(request, 'login.html', {'error': 'Invalid email or password.'})
-    else:
-        # Display the login page if not a POST request
-        return render(request, 'login.html')
-#Cookie for Login    
-@require_POST
-@csrf_exempt  # Generally avoid using csrf_exempt; it's shown here for illustrative purposes
-def ajax_login_view(request):
-    if request.is_ajax():
+        # Get username and password from the POST request.
         username = request.POST.get('username')
         password = request.POST.get('password')
-        
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                logger.info(f"User {username} logged in via AJAX.")
-                return JsonResponse({'success': True, 'redirect_url': reverse('demo:dashboard')})
+
+        # Attempt to authenticate the user.
+        user = authenticate(username=username, password=password)
+
+        # If the user is authenticated and active.
+        if user is not None and user.is_active:
+            login(request, user)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                redirect_url = reverse('dashboard_global:dashboard')  
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(username=username, password=password)
+
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+        if user is not None and user.is_active:
+            login(request, user)
+            if is_ajax:
+                return JsonResponse({'success': True, 'redirect_url': redirect_url})
             else:
-                logger.warning(f"Disabled account login attempt via AJAX: {username}")
-                return JsonResponse({'success': False, 'error': 'Your account is disabled.'})
+                return redirect(redirect_url)
+
+        error_message = 'Invalid username or password.' if user is None else 'Your account is disabled.'
+        if is_ajax:
+            return JsonResponse({'success': False, 'error': error_message}, status=400)
         else:
-            logger.warning(f"Failed AJAX login attempt for username: {username}")
-            return JsonResponse({'success': False, 'error': 'Invalid username or password.'})
-    else:
-        return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+            return render(request, 'login.html', {'error': error_message})
+
+    return render(request, 'login.html')
+
+    
 #QRcode Login 
 def login_with_qr(request, login_token):
     # Replace this with your actual logic for token verification and user authentication
@@ -88,65 +89,11 @@ def login_with_qr(request, login_token):
         # Log the user in
         login(request, user)
         # Redirect to the dashboard
-        return redirect(reverse('demo:dashboard'))  # Replace 'dashboard' with the name of your dashboard URL pattern
+        return redirect(reverse('dashboard'))  # Replace 'dashboard' with the name of your dashboard URL pattern
     else:
         # Handle invalid login token (e.g., show an error page)
         return redirect('invalid_login')  
     
-#Register Page
-def register(request):
-    if request.method == 'POST':
-        user_form = CustomUserCreationForm(request.POST)
-        employee_form = EmployeeRegistrationForm(request.POST)
-        
-        # Check if 'terms' checkbox is checked
-        if 'terms' not in request.POST:
-            messages.error(request, "You must agree to the terms to register.")
-        elif user_form.is_valid() and employee_form.is_valid():
-            user = user_form.save(commit=False)
-            user.is_active = False  # User will not be active until approved
-            user.save()
-            
-            employee = employee_form.save(commit=False)
-            employee.user = user
-            employee.save()
-            
-            # Optionally send an email here for account verification or admin approval
-            
-            messages.success(request, "Your account has been created and is pending approval.")
-            return redirect('pending_approval')  # Redirect to a pending approval page
-        else:
-            # If the forms have errors, these will be passed to the template and displayed
-            messages.error(request, "Please correct the errors below.")
-        
-        # Render the same page with the form data filled in and errors shown
-        return render(request, 'registration/register.html', {
-            'user_form': user_form,
-            'employee_form': employee_form
-        })
-
-    else:
-        user_form = CustomUserCreationForm()
-        employee_form = EmployeeRegistrationForm()
-
-    return render(request, 'registration/register.html', {
-        'user_form': user_form,
-        'employee_form': employee_form
-    })
-
-def pending_approval(request):
-    return render(request, 'registration/pending_approval.html')
-
-@login_required
-@permission_required('is_superuser')
-def approve_user(request, user_id):
-    user = User.objects.get(id=user_id)
-    user.is_approved = True
-    user.save()
-    # Redirect to the user list page or wherever is appropriate
-    return redirect('user_list')
-
-
 #QRcode Function
 def generate_qr(request):
     # Generate a unique token for the user session (replace with your actual logic)
@@ -177,10 +124,221 @@ def generate_qr(request):
     img_response = HttpResponse(content_type="image/png")
     img.save(img_response, "PNG")
     return img_response
+    
+#Register Page
+def register(request):
+    if request.method == 'POST':
+        form = EmployeeRegistrationForm(request.POST)
+        if form.is_valid():
+            # Save the form data without committing to the database
+            employee = form.save(commit=False)
+
+            # Get the email from the form's cleaned data
+            email = form.cleaned_data['email']
+
+            # Create a new User instance and associate it with the Employee
+            user = User.objects.create_user(
+                username=email.split('@')[0],  # Derive username from email
+                email=email,
+                password=User.objects.make_random_password()
+            )
+            employee.user = user
+
+            # Save both Employee and User instances
+            employee.save()
+            user.save()
+
+            # Confirm the redirection URL is correctly configured in urls.py
+            return redirect('users:pending_approval')
+        else:
+            # Check what errors are present if the form is not valid
+            print(form.errors)  # Adding logging to see the errors might help
+            return render(request, 'register.html', {'form': form})
+    else:
+        form = EmployeeRegistrationForm()
+    return render(request, 'register.html', {'form': form})
+
+
+
+
+
+@login_required
+@permission_required('users.can_approve_employee', raise_exception=True)
+def approve_user(request, employee_id):
+    employee = get_object_or_404(Employee, id=employee_id)
+    
+    # Check if the employee already has a user account linked
+    if employee.user:
+        messages.error(request, 'This employee already has a linked user account.')
+        return render(request, 'registration/registration_error.html', {'message': 'This employee already has a linked user account.'})
+    
+    try:
+        # Extract username from the employee's email
+        username = employee.email.split('@')[0] if employee.email else None
+        if not username:
+            messages.error(request, 'Invalid email address.')
+            return render(request, 'registration/registration_error.html', {'message': 'Invalid email address provided.'})
+        
+        # Create a new user for the employee
+        user = User.objects.create_user(
+            username=username,
+            email=employee.email,
+            password=User.objects.make_random_password()
+        )
+        employee.user = user
+        employee.user.is_approved = True
+        employee.user.is_active = True
+        employee.user.save()
+        employee.save()
+
+        # Sending the approval email
+        send_mail(
+            'Your Account Has Been Approved',
+            f'Here are your login credentials. Username: {user.username}. Please reset your password upon first login.',
+            'from@example.com',
+            [user.email],
+            fail_silently=False,
+        )
+        messages.success(request, f'Employee {user.username} has been successfully approved and notified.')
+        return redirect('users:user_list')
+    except Exception as e:
+        messages.error(request, f'An error occurred: {str(e)}')
+        return render(request, 'registration/registration_error.html', {'message': str(e)})
+
+def user_password_reset(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important to keep the user logged in
+            return redirect('users:password_reset_done')
+        else:
+            return render(request, 'registration/password_reset.html', {'form': form})
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'registration/password_reset.html', {'form': form})
+
+import logging
+logger = logging.getLogger(__name__)
+
+# Pending Approval
+@login_required
+@permission_required('users.can_view_pending', raise_exception=True)
+def pending_approval(request):
+    employees_pending = Employee.objects.filter(user__is_approved=False)
+    return render(request, 'registration/pending_approval.html', {'employees': employees_pending})
+
+# User credentials deny
+
+@login_required
+@permission_required('users.can_modify_user', raise_exception=True)
+def deny_user(request, user_id):
+    user = User.objects.get(id=user_id)
+    user.is_active = False  # Set the user as inactive or any other status
+    user.save()
+
+    messages.info(request, f"User {user.username} has been denied access.")
+    return redirect('users:users_dashboard')
+# Define the signal
+approve_user_signal = Signal()
+
+# User credentials display after approve
+@login_required
+@permission_required('auth.can_approve_user', raise_exception=True)
+def approve_user(request, user_id):
+    try:
+        user = User.objects.get(pk=user_id)
+        # Approve the user (example logic)
+        user.is_approved = True
+        user.save()
+        # Generate a new password for the user
+        new_password = get_random_string(length=10)  # Generate a random string of length 10
+        user.set_password(new_password)
+        user.save()
+        # Display success message and new user credentials
+        full_name = f"{user.first_name} {user.last_name}"
+        messages.success(request, f"User '{full_name}' has been successfully approved.")
+        context = {
+            'username': user.username,
+            'password': new_password,
+            'email': user.email,
+        }
+        return render(request, 'registration/new_user_credentials.html', context)
+    except User.DoesNotExist:
+        # User with the given ID does not exist
+        messages.error(request, "User not found.")
+        return redirect('users:users_dashboard')
+    
+# ResetPasword for new User
+class CustomPasswordResetView(FormView):
+    template_name = 'registration/new_user_password_reset.html'
+    success_url = reverse_lazy('users:new_user_password_reset_done')
+    form_class = PasswordResetForm
+
+    def form_valid(self, form):
+        email = form.cleaned_data['email']
+        user_model = get_user_model()
+        active_users = user_model._default_manager.filter(email__iexact=email, is_active=True)
+
+        for user in active_users:
+            subject = "Password Reset Requested"
+            email_template_name = "registration/password_reset_email.html"
+            context = {
+                "email": user.email,
+                "domain": settings.SITE_DOMAIN,
+                "site_name": "Website",
+                "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                "user": user,
+                "token": default_token_generator.make_token(user),
+                "protocol": settings.EMAIL_PROTOCOL,
+            }
+            email_body = render_to_string(email_template_name, context)
+            msg = EmailMultiAlternatives(subject, email_body, 'no-reply@yourdomain.com', [user.email])
+            try:
+                msg.send()
+            except Exception as e:
+                logger.error(f"Failed to send password reset email to {user.email}: {str(e)}")
+                # Consider adding user feedback here
+
+        return super().form_valid(form)
+
+    
+# Email sent with the link to login and change password   
+@require_POST  # Ensure that this view only accepts POST requests
+def send_password_reset_email(request):
+    user_id = request.POST.get('user_id')
+    user = get_object_or_404(User, pk=user_id)
+    # Construct your email message and send it
+    send_mail(
+        'Password Reset',
+        'Here is your password reset link.',
+        'from@example.com',
+        [user.email],
+        fail_silently=False,
+    )
+    return HttpResponse('Email sent successfully.')
+
+class PasswordResetDoneView(TemplateView):
+    template_name = 'registration/new_user_password_done.html'
+    
+
+def custom_logout(request):
+    logout(request)
+    # Redirect to a success page.
+    return redirect('users/logout') 
+
+ 
 
 #Dashboard Page
-def dashboard(request):
-    # You can fetch data or perform any other logic here before rendering the template
-    return render(request, 'dashboard.html')
+def users_dashboard(request):
+    users_to_approve = User.objects.filter(is_approved=False)  # or any other condition
+    return render(request, 'dashboard/users_dashboard.html', {'users_to_approve': users_to_approve})
 
+class UsersDashboardView(TemplateView):
+    template_name = 'users_dashboard.html'
+    context_object_name = 'users_to_approve'
+    
+    def get_queryset(self):
+        # Filter users based on some criteria, e.g., users who are not yet approved
+        return User.objects.filter(is_approved=False)  
 

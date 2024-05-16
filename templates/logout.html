@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block title %}Logged Out | Smart Inventory System{% endblock title %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock extra_styles %}
+
+{% block content %}
+<div class="outer-container">
+    <div class="message-container">
+        <h1 class="fw-light">You Have Been Logged Out</h1>
+        <p class="fw-light">You can log in again to continue managing your inventory.</p>
+        <div>
+            <a href="{% url 'users:home' %}" class="btn btn-primary">Log In Again</a>
+        </div>
+    </div>
+</div>
+{% endblock content %}

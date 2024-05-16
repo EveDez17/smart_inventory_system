@@ -1,0 +1,8 @@
+<!-- templates/transactions/transaction_detail.html -->
+<h2>Transaction Detail</h2>
+<p>Type: {{ transaction.get_transaction_type_display }}</p>
+<p>Status: {{ transaction.get_status_display }}</p>
+<p>Amount: {{ transaction.amount }}</p>
+<p>Description: {{ transaction.description }}</p>
+<p>Created At: {{ transaction.created_at }}</p>
+<p><a href="{% url 'inventory:transaction_list' %}">Back to list</a></p>

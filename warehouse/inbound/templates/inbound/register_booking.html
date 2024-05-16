@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Gatehouse Booking Dashboard | Smart Inventory System{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/dashboard_global.css' %}">
+<style>
+    .custom-grey-bg {
+        background-color: #f5f5f5; /* Replace with the hex code for the shade of grey you want */
+        border: 1px solid #dee2e6; /* Optional: Adds a border */
+        border-radius: 0.25rem; /* Optional: Adds rounded corners */
+        padding: 1rem; /* Optional: Adds space around the form */
+    }
+    </style>
+    <style>
+        body, html {
+            height: 100%; /* Ensure minimum height for the page */
+            margin: 0; /* Remove default margin */
+        }
+        .page-background {
+            background-color: #e9ecef; /* Replace with your desired color */
+            padding-top: 20px; /* Adjust this value as needed for spacing */
+            padding-bottom: 20px; /* Adjust this value as needed for spacing */
+            min-height: 100%; /* Minimum height to make sure it fills the screen */
+        }
+        .form-container {
+            background-color: #ffffff; /* White background for the form container */
+            padding: 2rem;
+            border-radius: 0.25rem;
+            margin-bottom: 20px; /* Space at the bottom */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05); /* Optional: Adds a subtle shadow to the form container */
+        }
+    </style>
+
+</style>
+{% endblock extra_styles %}
+{% block content %}
+<div class="page-background d-flex flex-column justify-content-between">
+    <div class="container">
+        <h1 class="text-center">Gatehouse Booking Dashboard</h1>
+        
+
+        <!-- Place to display messages -->
+        {% if messages %}
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    {% for message in messages %}
+                        <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        
+        <div class="row justify-content-center">
+            <div class="col-md-6 form-container">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary w-100 mt-2">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

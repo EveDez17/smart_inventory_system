@@ -7,13 +7,14 @@ import datetime
 from decimal import Decimal
 from django.utils import timezone
 from channels.testing import WebsocketCommunicator
-from warehouse.inventory.models import Address, Inbound, Level, Order, Outbound, PNDLocation, PickFace, PutawayTask, Supplier, VNATask
+from warehouse.inbound.models import Inbound, PutawayTask
 from warehouse.inventory import models
-from warehouse.inventory.notification_utils import send_urgent_notification
+from warehouse.outbound.models import Order, Outbound, VNATask
+from warehouse.storage.models import Level, PNDLocation, PickFace
 from warehouse.tests.factories import AddressFactory, AisleFactory, CategoryFactory, CustomerFactory, FLTTaskFactory, FinalBayAssignmentFactory, FoodProductFactory, GatehouseBookingFactory, InboundFactory, LevelFactory, LocationFactory, OrderFactory, OrderItemFactory, OrderPickingTaskFactory, OutboundFactory, PNDLocationFactory, PickFaceFactory, ProductLocationFactory, ProvisionalBayAssignmentFactory, PutawayTaskFactory, RackFactory, ReceivingFactory, ReplenishmentPickingVNATaskFactory, ReplenishmentRequestFactory, ReplenishmentTaskFactory, StockLevelFactory, SupplierFactory, VNATaskFactory, ZoneFactory
 from django.db.utils import IntegrityError
 from asgiref.sync import sync_to_async
-from warehouse.inventory.routing import application
+from warehouse.outbound.routing import application
 
 
 
@@ -51,7 +52,7 @@ def test_inventory_category_creation(db, name, slug, is_active):
 def test_address_creation_and_retrieval(street_number, street_name, city, county, country, post_code, is_valid):
     if is_valid:
         # Directly create the address
-        address = Address.objects.create(
+        address = models.Address.objects.create(
             street_number=street_number, 
             street_name=street_name, 
             city=city, 
@@ -61,7 +62,7 @@ def test_address_creation_and_retrieval(street_number, street_name, city, county
         )
 
         # Fetch the address to ensure it's saved and retrievable
-        fetched_address = Address.objects.get(post_code=post_code)
+        fetched_address = models.Address.objects.get(post_code=post_code)
 
         # Assert that the fetched address matches the created one
         assert fetched_address.street_number == street_number
@@ -73,7 +74,7 @@ def test_address_creation_and_retrieval(street_number, street_name, city, county
     else:
         # Test the creation of an address that violates some constraints (e.g., non-unique post_code)
         with pytest.raises(Exception):  # Use the specific exception that your model would raise under the failure condition
-            Address.objects.create(
+            models.Address.objects.create(
                 street_number=street_number, 
                 street_name=street_name, 
                 city=city, 
@@ -118,7 +119,7 @@ def test_supplier_creation_with_address(name, contact, email, contact_number, cr
     )
 
     # Fetch the supplier to ensure it's saved and retrievable
-    fetched_supplier = Supplier.objects.get(name=supplier.name)
+    fetched_supplier = models.Supplier.objects.get(name=supplier.name)
 
     # Assert that the fetched supplier matches the created one
     assert fetched_supplier.name == name
@@ -454,7 +455,7 @@ def test_location_urgent_pick_triggers_notification():
     # Ensure the mock path is correct; it should match exactly where send_email_notification is imported and used
     with patch('warehouse.inventory.notification_utils.send_email_notification') as mock_send_email:
         # Directly call the high-level notification function with the prepared location
-        send_urgent_notification(location)
+        'outbound.send_urgent_notification'(location)
         
         # Verify that send_email_notification was called correctly
         mock_send_email.assert_called_once_with(

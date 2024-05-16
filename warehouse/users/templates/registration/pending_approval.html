@@ -1,12 +1,20 @@
 {% extends 'base.html' %}  <!-- Make sure this is the correct path to your base template -->
-
-{% block title %}Account Pending Approval{% endblock title %}
+{% load static %}
+{% block title %}Account Pending Approval | Smart Inventory System{% endblock title %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock extra_styles %}
 
 {% block content %}
-<div class="container">
-    <h1>Account Pending Approval</h1>
-    <p>Thank you for registering! Your account is currently pending approval by an administrator. You will receive an email once your account has been activated.</p>
-    <a href="{% url 'users:superuser' %}">Return to home page</a> <!-- Replace 'home' with the actual name of your home URL pattern -->
+<div class="outer-container">
+    <div class="message-container">
+        <h1 class="fw-light">Account Pending Approval</h1>
+        <p class="fw-light">Thank you for registering! Your account is currently pending approval by an administrator. You will receive an email once your account has been activated.</p>
+        <div>
+            <a href="{% url 'index' %}" class="btn btn-primary">Return to home page</a> 
+        </div>
+    </div>
 </div>
 {% endblock content %}
+
 

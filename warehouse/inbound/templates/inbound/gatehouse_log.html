@@ -1,0 +1,132 @@
+{% extends 'inbound_base.html' %}
+{% load static %}
+{% block title %}Gatehouse Booking Dashboard | Smart Inventory System{% endblock %}
+{% block extra_styles %}
+<link rel="stylesheet" href="{% static 'css/dashboard_global.css' %}">
+{% endblock extra_styles %}
+{% block content %}
+<div class="container mt-4">
+    <h1>Gatehouse Booking Dashboard</h1>
+    <p>Welcome to your dashboard!</p>
+    <!-- Table for booking details -->
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Driver Name</th>
+                        <th>Company</th>
+                        <th>Vehicle Registration</th>
+                        <th>Trailer Number</th>
+                        <th>Arrival Time</th>
+                        <th>Paperwork</th>
+                        <th>Description</th>
+                        <th>Cancelled</th>
+                        <td>
+                            <a href="{% url 'booking_edit' booking.id %}" class="btn btn-sm btn-secondary">Edit</a>
+                            <a href="{% url 'booking_delete' booking.id %}" class="btn btn-sm btn-danger">Delete</a>
+                            <a href="{% url 'booking_cancel' booking.id %}" class="btn btn-sm btn-warning">Cancel</a>
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td>{{ booking.driver_name }}</td>
+                        <td>{{ booking.company }}</td>
+                        <td>{{ booking.vehicle_registration }}</td>
+                        <td>{{ booking.trailer_number }}</td>
+                        <td>{{ booking.arrival_time }}</td>
+                        <td>{{ booking.has_paperwork|yesno:"Yes,No" }}</td>
+                        <td>{{ booking.paperwork_description }}</td>
+                        <td>{{ booking.cancelled|yesno:"Yes,No" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">No bookings found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add below the existing table -->
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <h2>Provisional Bay Assignments</h2>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Driver Name</th>
+                        <th>Company</th>
+                        <th>Vehicle Registration</th>
+                        <th>Assigned Bay</th>
+                        <td>
+                            <a href="{% url 'booking_edit' booking.id %}" class="btn btn-sm btn-secondary">Edit</a>
+                            <a href="{% url 'booking_delete' booking.id %}" class="btn btn-sm btn-danger">Delete</a>
+                            <a href="{% url 'booking_cancel' booking.id %}" class="btn btn-sm btn-warning">Cancel</a>
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assignment in assignments %}
+                    <tr>
+                        <td>{{ assignment.driver_name }}</td>
+                        <td>{{ assignment.company }}</td>
+                        <td>{{ assignment.vehicle_registration }}</td>
+                        <td>{{ assignment.assigned_bay }}</td>
+                        <!-- Add more columns as needed -->
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No provisional bay assignments found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+<!-- Cards for New Booking, Assigning Provisional Bay, and Final Bay Assignment -->
+<div class="row justify-content-center">
+    <!-- Card for New Booking -->
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-info h-100">
+            <div class="card-header">Create New Booking</div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Quick Access</h5>
+                <p class="card-text">Add a new booking to the system quickly.</p>
+                <a href="{% url 'inbound:register_booking' %}" class="btn btn-light mt-auto">New Booking</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card for Assigning Provisional Bay -->
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-header">Assign Provisional Bay</div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Manage Bays</h5>
+                <p class="card-text">Assign a new provisional bay for a booking.</p>
+                <a href="{% url 'inbound:create_provisional_bay_assignment' %}" class="btn btn-light mt-auto">Assign Bay</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card for Final Bay Assignment -->
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-success h-100">
+            <div class="card-header">Final Bay Assignments</div>
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Finalize Loading</h5>
+                <p class="card-text">View and manage final bay assignments.</p>
+                <a href="{% url 'inbound:final_bay_assignments' %}" class="btn btn-light mt-auto">View Assignments</a>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+{% endblock %}
+
